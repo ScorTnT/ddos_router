@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Install required packages
 RUN apk add --no-cache \
@@ -38,13 +38,13 @@ COPY . .
 
 # Build the application
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-musl-gcc \
-    go build -ldflags="-linkmode external -extldflags '-static'" -o /app/router_api
+    go build -ldflags="-linkmode external -extldflags '-static'" -o /app/backend
 
 # Final stage
 FROM scratch
 
 # Copy the binary from the build stage
-COPY --from=builder /app/router_api /router_api
+COPY --from=builder /app/backend /backend
 
 # Set the entrypoint
-ENTRYPOINT ["/router_api"]
+ENTRYPOINT ["/backend"]
