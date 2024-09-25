@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Set the name for your binary
+BINARY_NAME=router_api
+
+# Check if build folder exists, if not create it
+if [ ! -d "./build" ]; then
+    echo "Build folder does not exist. Creating it..."
+    mkdir -p "./build"
+fi
+
+# Build the Docker image
+docker build -t router_api-aarch64-musl .
+
+# Create a temporary container
+docker create --name temp router_api-aarch64-musl
+
+# Copy the binary from the container
+docker cp temp:/router_api ./build/$BINARY_NAME
+
+# Remove the temporary container
+docker rm temp
+
+echo "Binary extracted as $BINARY_NAME"
+
+# scp build/router_api root@192.168.50.194:/secure_router/router_api/router_api

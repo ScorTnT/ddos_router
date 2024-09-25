@@ -1,0 +1,34 @@
+function App() {
+  let [routing, setRouting] = useState(['networkSetting', 'userSetting', 'intranetSetting']);
+
+  return (
+    <>
+      <Router>
+
+        <div className="list">
+          <Link to="">{ routing[0] }</Link>
+          <hr/>
+        </div>
+
+        <div className="list">
+          <Link to="">{ routing[1] }</Link>
+	  <hr/>
+        </div>
+
+        <div className="list">
+	  <Link to="">{ routing[2] }</Link>
+	  <hr/>
+        </div>
+	
+	<Routes>
+	  <Route path="" element={ } />
+	  <Route path="" element={ } />
+	  <Route path="" element={ } />
+	</Routes>
+
+      </Router>
+    </>
+  );
+}
+
+export default App;
