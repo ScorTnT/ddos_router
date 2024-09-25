@@ -1,65 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchConnectionData, analyzeConnectionData } from './statistics';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function Config() {
-  const [settings, setSettings] = useState({
-    theme: 'light',
-    notifications: true,
-    language: 'ko'
-  });
+  const [connectionStats, setConnectionStats] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setSettings(prevSettings => ({
-      ...prevSettings,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+  useEffect(() => {
+    async function loadData() {
+      const data = await fetchConnectionData();
+      const stats = analyzeConnectionData(data);
+      setConnectionStats(stats);
+    }
+    loadData();
+  }, []);
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Connection Statistics',
+      },
+    },
   };
+
+  const protocolChartData = connectionStats ? {
+    labels: Object.keys(connectionStats.protocolCount),
+    datasets: [
+      {
+        label: 'Protocol Count',
+        data: Object.values(connectionStats.protocolCount),
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      },
+    ],
+  } : null;
+
+  const stateChartData = connectionStats ? {
+    labels: Object.keys(connectionStats.stateCount),
+    datasets: [
+      {
+        label: 'State Count',
+        data: Object.values(connectionStats.stateCount),
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      },
+    ],
+  } : null;
 
   return (
     <div className="Config">
-      <h1>설정 페이지</h1>
-      <form>
+      <h1>Network Connection Statistics</h1>
+      {connectionStats ? (
         <div>
-          <label htmlFor="theme">테마:</label>
-          <select
-            id="theme"
-            name="theme"
-            value={settings.theme}
-            onChange={handleChange}
-          >
-            <option value="light">라이트</option>
-            <option value="dark">다크</option>
-          </select>
+          <p>Total Connections: {connectionStats.connectionCount}</p>
+          <p>Total Bytes Sent: {connectionStats.totalBytesSent}</p>
+          <p>Total Bytes Received: {connectionStats.totalBytesReceived}</p>
+          
+          <div style={{width: '500px', height: '300px'}}>
+            <h2>Protocol Distribution</h2>
+            <Bar options={chartOptions} data={protocolChartData} />
+          </div>
+          
+          <div style={{width: '500px', height: '300px'}}>
+            <h2>Connection State Distribution</h2>
+            <Bar options={chartOptions} data={stateChartData} />
+          </div>
         </div>
-        <div>
-          <label htmlFor="notifications">알림:</label>
-          <input
-            type="checkbox"
-            id="notifications"
-            name="notifications"
-            checked={settings.notifications}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label htmlFor="language">언어:</label>
-          <select
-            id="language"
-            name="language"
-            value={settings.language}
-            onChange={handleChange}
-          >
-            <option value="ko">한국어</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-      </form>
-      <div>
-        <h2>현재 설정:</h2>
-        <p>테마: {settings.theme}</p>
-        <p>알림: {settings.notifications ? '켜짐' : '꺼짐'}</p>
-        <p>언어: {settings.language === 'ko' ? '한국어' : 'English'}</p>
-      </div>
+      ) : (
+        <p>Loading connection data...</p>
+      )}
     </div>
   );
 }

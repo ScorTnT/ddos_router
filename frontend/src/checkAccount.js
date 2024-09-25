@@ -1,6 +1,7 @@
 export async function attemptLogin(username, password) {
   try {
-    const response = await fetch('http://project.greatmandu.xyz:2024/login', {
+    const endpoint = window.location.hostname;
+    const response = await fetch(`http://${endpoint}:2024/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
