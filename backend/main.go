@@ -4,9 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
 
+	"github.com/ScorTnT/ddos_router/backend/controller"
+	"github.com/ScorTnT/ddos_router/backend/database"
 	"github.com/gofiber/fiber/v2"
-	"github.com/mchu7797/router_api/controller"
-	"github.com/mchu7797/router_api/database"
 )
 
 func main() {

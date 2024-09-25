@@ -1,9 +1,9 @@
 package controller
 
 import (
+	"github.com/ScorTnT/ddos_router/backend/database"
+	"github.com/ScorTnT/ddos_router/backend/database/models"
 	"github.com/gofiber/fiber/v2"
-	"github.com/mchu7797/router_api/database"
-	"github.com/mchu7797/router_api/database/models"
 )
 
 func SearchNetworkConfig(c *fiber.Ctx) error {

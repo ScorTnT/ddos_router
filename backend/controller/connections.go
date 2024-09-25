@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"github.com/ScorTnT/ddos_router/backend/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/mchu7797/router_api/utils"
 )
 
 func GetConnections(c *fiber.Ctx) error {
