@@ -1,34 +1,33 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Navigate, Routes } from 'react-router-dom';
 import Login from './Login';
-
-function Home() {
-  return <h1>Welcome to the Home Page</h1>;
-}
+import Config from './Config';
 
 function App() {
-  let [routing, setRouting] = useState(['networkSetting', 'userSetting', 'intranetSetting']);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   return (
     <Router>
       <div className="App">
-
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/login">Login</Link>
-            </li>
-          </ul>
-        </nav>
-
         <Routes>
-          <Route exact path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={isLoggedIn ? <Navigate to="/config" /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/login"
+            element={
+              isLoggedIn ?
+              <Navigate to="/config" /> :
+              <Login setIsLoggedIn={setIsLoggedIn} />
+            }
+          />
+          <Route
+            path="/config"
+            element={isLoggedIn ? <Config /> : <Navigate to="/login" />}
+          />
         </Routes>
       </div>
-
     </Router>
   );
 }

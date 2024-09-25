@@ -1,23 +1,29 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { attemptLogin } from './checkAccount.js';
 
-function Login() {
+function Login({ setIsLoggedIn }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loginResult, setLoginResult] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await attemptLogin(username, password);
-    setLoginResult(result);
+    if (result) {
+      setIsLoggedIn(true);
+      navigate('/config');
+    } else {
+      alert('로그인 실패');
+    }
   };
 
   return (
-    <div className="App">
-      <h1>Login Test</h1>
+    <div className="Login">
+      <h1>로그인</h1>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="username">Username:</label>
+          <label htmlFor="username">사용자명:</label>
           <input
             type="text"
             id="username"
@@ -26,7 +32,7 @@ function Login() {
           />
         </div>
         <div>
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password">비밀번호:</label>
           <input
             type="password"
             id="password"
@@ -34,13 +40,8 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit">로그인</button>
       </form>
-      {loginResult !== null && (
-        <p>
-          Login result: {loginResult ? 'Success' : 'Failure'}
-        </p>
-      )}
     </div>
   );
 }
