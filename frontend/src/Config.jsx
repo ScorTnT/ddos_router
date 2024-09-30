@@ -16,6 +16,7 @@ function Config() {
     }
     loadData();
   }, []);
+  const datatest={};
 
   const chartOptions = {
     responsive: true,
