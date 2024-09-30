@@ -3,8 +3,8 @@ package controller
 import (
 	"strconv"
 
+	"github.com/ScorTnT/ddos_router/backend/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/mchu7797/router_api/utils"
 )
 
 type LoginRequest struct {

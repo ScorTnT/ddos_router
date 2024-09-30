@@ -3,7 +3,7 @@ package database
 import (
 	"time"
 
-	"github.com/mchu7797/router_api/database/models"
+	"github.com/ScorTnT/ddos_router/backend/database/models"
 )
 
 func CheckToken(tokenString string) bool {
