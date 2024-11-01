@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { fetchConnectionData, analyzeConnectionData } from './statistics';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-
+import NetworkSetting from './NetworkSetting';
+import IntraNetSetting from './IntranetSetting';
+import UserSetting from './UserSetting';
+import Login from './Login';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function Config() {
@@ -16,7 +19,6 @@ function Config() {
     }
     loadData();
   }, []);
-  const datatest={};
 
   const chartOptions = {
     responsive: true,
@@ -53,9 +55,41 @@ function Config() {
     ],
   } : null;
 
+  const RoutingTable =  <><Router>
+  <Routes>
+    <Route
+      path="/network-setting"
+      element={
+        isLoggedIn ?
+        <NetworkSetting /> :
+        <Login/>
+      }
+    />
+    <Route
+      path="/user-setting"
+      element={
+        isLoggedIn ?
+        <UserSetting /> :
+        <Login/>
+      }
+    />
+    <Route
+      path="/intranet-setting"
+      element={
+        isLoggedIn ?
+        <IntraNetSetting /> :
+        <Login/>
+      }
+    />
+  </Routes>
+    
+  </Router></>
+
   return (
     <div className="Config">
+      <title>Connection Statistics</title>
       <h1>Network Connection Statistics</h1>
+      <RoutingTable></RoutingTable>
       {connectionStats ? (
         <div>
           <p>Total Connections: {connectionStats.connectionCount}</p>
