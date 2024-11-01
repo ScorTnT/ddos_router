@@ -4,7 +4,9 @@ function UserConfig() {
     const [adminId, setAdminId] = useState("root");
     const [adminPassword, setAdminPassword] = useState("");
 
-    return <></>
+    return <>
+        
+    </>
 }
 
 export default UserConfig;

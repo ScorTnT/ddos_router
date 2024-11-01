@@ -38,8 +38,8 @@ import PropTypes from "prop-types";
 
 import {getConnections} from './api/getConnections';
 
-import IntranetConfig from './IntranetConfig.jsx';
 import NetworkConfig from './NetworkConfig.jsx';
+import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
 
 function Dashboard({setIsLoggedIn}) {
@@ -74,19 +74,17 @@ function Dashboard({setIsLoggedIn}) {
                     sx={{backgroundColor: 'primary.dark'}}
                 >
                     <Tab icon={<SpeedIcon/>} label="정보"/>
-                    <Tab icon={<SettingsIcon/>} label="설정"/>
                     <Tab icon={<SettingsIcon />} label="네트워크 기본 설정" />
                     <Tab icon={<SettingsIcon />} label="내부 네트워크 설정" />
                     <Tab icon={<SettingsIcon />} label="관리자 설정" />
                 </Tabs>
             </AppBar>
 
-            <Box sx={{p: 3}}>
-                {currentTab === 0 ? (
-                    <InfoPanel/>
-                ) : (
-                    <NetworkConfig/>
-                )}
+            <Box sx={{ p: 3 }}>
+                {currentTab === 0 && <InfoPanel />}
+                {currentTab === 1 && <NetworkConfig />}
+                {currentTab === 2 && <IntranetConfig />}
+                {currentTab === 3 && <UserConfig />}
             </Box>
         </Box>
     );
