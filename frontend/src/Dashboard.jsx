@@ -69,6 +69,9 @@ const Dashboard = ({setIsLoggedIn}) => {
                 >
                     <Tab icon={<SpeedIcon/>} label="정보"/>
                     <Tab icon={<SettingsIcon/>} label="설정"/>
+                    <Tab icon={<SettingsIcon />} label="네트워크 기본 설정" />
+                    <Tab icon={<SettingsIcon />} label="내부 네트워크 설정" />
+                    <Tab icon={<SettingsIcon />} label="관리자 설정" />
                 </Tabs>
             </AppBar>
 
