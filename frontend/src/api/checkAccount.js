@@ -1,6 +1,6 @@
 export async function attemptLogin(username, password) {
     try {
-        const response = await fetch(`http://${window.location.origin}:2024/login`, {
+        const response = await fetch(`http://${window.location.hostname}:2024/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
