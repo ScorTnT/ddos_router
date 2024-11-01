@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import {
     Alert,
     Box,
@@ -12,6 +12,7 @@ import {
     Typography
 } from '@mui/material';
 import {Lock, Person, Visibility, VisibilityOff} from '@mui/icons-material';
+import PropTypes from 'prop-types';
 import {attemptLogin} from './api/checkAccount';
 
 const Login = ({setIsLoggedIn}) => {
@@ -84,12 +85,14 @@ const Login = ({setIsLoggedIn}) => {
                             value={formData.username}
                             onChange={handleChange}
                             required
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Person/>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Person/>
+                                        </InputAdornment>
+                                    ),
+                                }
                             }}
                         />
 
@@ -101,22 +104,24 @@ const Login = ({setIsLoggedIn}) => {
                             value={formData.password}
                             onChange={handleChange}
                             required
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Lock/>
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <VisibilityOff/> : <Visibility/>}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Lock/>
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }
                             }}
                         />
 
@@ -151,6 +156,10 @@ const Login = ({setIsLoggedIn}) => {
             </Card>
         </Box>
     );
+};
+
+Login.propTypes = {
+    setIsLoggedIn: PropTypes.func.isRequired
 };
 
 export default Login;

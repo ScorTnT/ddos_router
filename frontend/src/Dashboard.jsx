@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {
     AppBar,
     Box,
@@ -34,9 +34,15 @@ import {
     Settings as SettingsIcon,
     Speed as SpeedIcon
 } from '@mui/icons-material';
+import PropTypes from "prop-types";
+
 import {getConnections} from './api/getConnections';
 
-const Dashboard = ({setIsLoggedIn}) => {
+import IntranetConfig from './IntranetConfig.jsx';
+import NetworkConfig from './NetworkConfig.jsx';
+import UserConfig from './UserConfig.jsx';
+
+function Dashboard({setIsLoggedIn}) {
     const [currentTab, setCurrentTab] = useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -79,14 +85,14 @@ const Dashboard = ({setIsLoggedIn}) => {
                 {currentTab === 0 ? (
                     <InfoPanel/>
                 ) : (
-                    <SettingsPanel/>
+                    <NetworkConfig/>
                 )}
             </Box>
         </Box>
     );
 };
 
-const InfoPanel = () => {
+function InfoPanel() {
     const [connectionLog, setConnectionLog] = useState('연결 정보를 불러오는 중...');
     const [isAutoUpdate, setIsAutoUpdate] = useState(true);
     const [updateError, setUpdateError] = useState(null);
@@ -165,11 +171,13 @@ const InfoPanel = () => {
                         rows={10}
                         variant="outlined"
                         value={updateError || connectionLog}
-                        inputProps={{
-                            readOnly: true,
-                            style: {
-                                fontFamily: 'monospace',
-                                fontSize: '0.875rem'
+                        slotProps={{
+                            input: {
+                                readOnly: true,
+                                style: {
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.875rem'
+                                }
                             }
                         }}
                         error={!!updateError}
@@ -217,67 +225,10 @@ const InfoPanel = () => {
             </Card>
         </Stack>
     );
-};
+}
 
-const SettingsPanel = () => {
-    return (
-        <Card>
-            <CardContent>
-                <Stack spacing={3}>
-                    <Typography variant="h6" gutterBottom>
-                        기본 설정
-                    </Typography>
-
-                    <FormControl fullWidth>
-                        <InputLabel>무선 채널</InputLabel>
-                        <Select
-                            value={6}
-                            label="무선 채널"
-                        >
-                            <MenuItem value={1}>채널 1 (2.4GHz)</MenuItem>
-                            <MenuItem value={6}>채널 6 (2.4GHz)</MenuItem>
-                            <MenuItem value={11}>채널 11 (2.4GHz)</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    <FormControl fullWidth>
-                        <InputLabel>보안 모드</InputLabel>
-                        <Select
-                            value="wpa3"
-                            label="보안 모드"
-                        >
-                            <MenuItem value="wpa2">WPA2-PSK</MenuItem>
-                            <MenuItem value="wpa3">WPA3-PSK</MenuItem>
-                            <MenuItem value="mixed">WPA2/WPA3 혼합</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    <FormControlLabel
-                        control={<Switch defaultChecked/>}
-                        label="게스트 네트워크 활성화"
-                    />
-
-                    <FormControlLabel
-                        control={<Switch defaultChecked/>}
-                        label="QoS 활성화"
-                    />
-
-                    <FormControlLabel
-                        control={<Switch defaultChecked/>}
-                        label="방화벽 활성화"
-                    />
-
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{mt: 2}}
-                    >
-                        설정 저장
-                    </Button>
-                </Stack>
-            </CardContent>
-        </Card>
-    );
-};
+Dashboard.propTypes = {
+    setIsLoggedIn: PropTypes.func.isRequired
+}
 
 export default Dashboard;
