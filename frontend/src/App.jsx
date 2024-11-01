@@ -1,35 +1,37 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Navigate, Routes } from 'react-router-dom';
-import Login from './Login';
-import Config from './Config';
+import {useState} from 'react';
+import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
+import Login from './Login.jsx';
+import Dashboard from './Dashboard.jsx';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route
-            path="/"
-            element={isLoggedIn ? <Navigate to="/config" /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/login"
-            element={
-              isLoggedIn ?
-              <Navigate to="/config" /> :
-              <Login setIsLoggedIn={setIsLoggedIn} />
-            }
-          />
-          <Route
-            path="/config"
-            element={isLoggedIn ? <Config /> : <Navigate to="/login" />}
-          />
-        </Routes>
-      </div>
-    </Router>
-  );
+    return (
+        <Router>
+            <Routes>
+                <Route
+                    path="/"
+                    element={isLoggedIn ? <Navigate to="/dashboard"/> : <Navigate to="/login"/>}
+                />
+                <Route
+                    path="/login"
+                    element={
+                        isLoggedIn ?
+                            <Navigate to="/dashboard"/> :
+                            <Login setIsLoggedIn={setIsLoggedIn}/>
+                    }
+                />
+                <Route
+                    path="/dashboard/*"
+                    element={
+                        isLoggedIn ?
+                            <Dashboard setIsLoggedIn={setIsLoggedIn}/> :
+                            <Navigate to="/login"/>
+                    }
+                />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;
