@@ -26,7 +26,7 @@ function IntranetConfig()  {
                         variant="contained"
                         color="primary"
                         sx={{mt: 2}}
-                    >
+                        >
                         설정 저장
                     </Button>
                 </Stack>
