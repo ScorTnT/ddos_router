@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 
 function IntranetConfig()  {
-    const intranetStatus = <>intranet</>
+    const IntranetStatus = "intranet";
 
     return (
         <Card>
