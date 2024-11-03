@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Button,
     Card,
     CardContent,
+    FormControl,
     FormControlLabel,
+    InputLabel,
+    MenuItem,
     Radio,
     RadioGroup,
-    TextField,
+    Select,
     Stack,
     Switch,
+    TextField,
     Typography
 } from "@mui/material";
 
@@ -20,11 +24,25 @@ function NetworkConfig() {
     const [gateway, setGateway] = useState("220.66.87.2");
     const [primaryDNS, setPrimaryDNS] = useState("8.8.8.8");
     const [secondaryDNS, setSecondaryDNS] = useState("8.8.4.4");
-    const [wanMacAddress, setWanMacAddress] = useState("ff:ff:ff:ff:ff:ff");
+    const [wanMacAddress, setWanMacAddress] = useState(""); // 선택한 MAC 주소 저장
     const [mtu, setMtu] = useState("1500");
     const [manualDns, setManualDns] = useState(true);
     const [macAddressChange, setMacAddressChange] = useState(true);
     const [manualMtu, setManualMtu] = useState(false);
+
+    // 예시 MAC 주소 리스트
+    const macAddressOptions = [
+        "FF:AA:AA:99:6F:TE",
+        "C4:C3:KK:34:55:AR",
+        "TT:BE:JE:12:34:5K"
+    ];
+
+    // macAddressChange가 비활성화되면 wanMacAddress를 첫 번째 항목으로 설정
+    useEffect(() => {
+        if (!macAddressChange) {
+            setWanMacAddress(macAddressOptions[0]);
+        }
+    }, [macAddressChange]);
 
     return (
         <Card>
@@ -99,13 +117,19 @@ function NetworkConfig() {
                         control={<Switch checked={macAddressChange} onChange={(e) => setMacAddressChange(e.target.checked)} />}
                         label="MAC 주소 변경"
                     />
-                    <TextField
-                        label="WAN MAC 주소"
-                        value={wanMacAddress}
-                        onChange={(e) => setWanMacAddress(e.target.value)}
-                        fullWidth
-                        disabled={!macAddressChange}  // MAC 주소 변경 해제 시 비활성화
-                    />
+                    <FormControl fullWidth disabled={!macAddressChange}>
+                        <InputLabel>WAN MAC 주소</InputLabel>
+                        <Select
+                            value={wanMacAddress}
+                            onChange={(e) => setWanMacAddress(e.target.value)}
+                        >
+                            {macAddressOptions.map((mac, index) => (
+                                <MenuItem key={index} value={mac}>
+                                    {mac}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
 
                     <FormControlLabel
                         control={<Switch checked={manualMtu} onChange={(e) => setManualMtu(e.target.checked)} />}
