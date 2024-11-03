@@ -18,7 +18,7 @@ func GetIntranetConfig(c *fiber.Ctx) error {
 }
 
 func SetIntranetConfig(c *fiber.Ctx) error {
-	intranetConfig := config.NewInternetConfig()
+	intranetConfig := config.NewIntranetConfig()
 
 	if err := c.BodyParser(intranetConfig); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -26,7 +26,7 @@ func SetIntranetConfig(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := intranetConfig.SaveInternetConfig(); err != nil {
+	if err := intranetConfig.SaveIntranetConfig(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
