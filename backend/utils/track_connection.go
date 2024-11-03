@@ -25,20 +25,67 @@ func ParseConntrackOutput(output string) []ConntrackEntry {
 	scanner := bufio.NewScanner(strings.NewReader(output))
 	for scanner.Scan() {
 		line := scanner.Text()
+
+		// Skip empty lines
+		if len(strings.TrimSpace(line)) == 0 {
+			continue
+		}
+
 		fields := strings.Fields(line)
+
+		// Basic validation of minimum fields
 		if len(fields) < 7 {
 			continue
 		}
-		entry := ConntrackEntry{
-			Protocol:    fields[0],
-			SourceIP:    strings.Split(fields[3], "=")[1],
-			DestIP:      strings.Split(fields[4], "=")[1],
-			SourcePort:  strings.Split(fields[5], "=")[1],
-			DestPort:    strings.Split(fields[6], "=")[1],
-			PacketCount: fields[len(fields)-3],
-			ByteCount:   fields[len(fields)-2],
+
+		entry := ConntrackEntry{}
+
+		// Safely parse protocol
+		entry.Protocol = fields[0]
+
+		// Safely parse IP addresses and ports
+		for _, field := range fields {
+			parts := strings.Split(field, "=")
+			if len(parts) != 2 {
+				continue
+			}
+
+			key := parts[0]
+			value := parts[1]
+
+			switch key {
+			case "src":
+				entry.SourceIP = value
+			case "dst":
+				entry.DestIP = value
+			case "sport":
+				entry.SourcePort = value
+			case "dport":
+				entry.DestPort = value
+			}
 		}
-		entries = append(entries, entry)
+
+		// Safely parse packet and byte counts
+		// Usually these are the last fields, but we'll search for them specifically
+		for _, field := range fields {
+			if strings.HasPrefix(field, "packets=") {
+				parts := strings.Split(field, "=")
+				if len(parts) == 2 {
+					entry.PacketCount = parts[1]
+				}
+			}
+			if strings.HasPrefix(field, "bytes=") {
+				parts := strings.Split(field, "=")
+				if len(parts) == 2 {
+					entry.ByteCount = parts[1]
+				}
+			}
+		}
+
+		// Only append if we have the minimum required fields
+		if entry.SourceIP != "" && entry.DestIP != "" {
+			entries = append(entries, entry)
+		}
 	}
 	return entries
 }

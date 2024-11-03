@@ -20,23 +20,23 @@ const ConfigPath string = "/etc/config/custom_network/internet"
 // InternetConfig OpenWrt 인터넷 연결 설정을 위한 구조체
 type InternetConfig struct {
 	// 네트워크 프로토콜 설정
-	Proto ConnectionType // 'dhcp' 또는 'static'
+	Proto ConnectionType `json:"connection_type"` // 'dhcp' 또는 'static'
 
 	// IP 설정
-	IpAddr  string // xxx.xxx.xxx.xxx 형식
-	Netmask string // xxx.xxx.xxx.xxx 형식
-	Gateway string // xxx.xxx.xxx.xxx 형식
+	IpAddr  string `json:"ip_addr"` // xxx.xxx.xxx.xxx 형식
+	Netmask string `json:"netmask"` // xxx.xxx.xxx.xxx 형식
+	Gateway string `json:"gateway"` // xxx.xxx.xxx.xxx 형식
 
 	// DNS 설정
-	DNS          []string // DNS 서버 목록
-	UseCustomDNS bool     // DNS 커스텀 설정 여부
+	DNS          []string `json:"dns_list"`       // DNS 서버 목록
+	UseCustomDNS bool     `json:"use_custom_dns"` // DNS 커스텀 설정 여부
 
 	// MAC 주소 설정
-	MACAddr  string // XX:XX:XX:XX:XX:XX 형식
-	CloneMAC bool   // MAC 주소 변경 사용 여부
+	MACAddr  string `json:"mac_addr"`  // XX:XX:XX:XX:XX:XX 형식
+	CloneMAC bool   `json:"clone_mac"` // MAC 주소 변경 사용 여부
 
 	// MTU 설정
-	MTU int // MTU 값
+	MTU int `json:"mtu"` // MTU 값
 }
 
 // NewInternetConfig 기본값으로 초기화된 인터넷 설정 구조체 생성
@@ -54,8 +54,8 @@ func NewInternetConfig() *InternetConfig {
 	}
 }
 
-// SaveToFile OpenWrt UCI 형식으로 설정을 파일에 저장
-func (i *InternetConfig) SaveToFile() error {
+// SaveNetworkConfig OpenWrt UCI 형식으로 설정을 파일에 저장
+func (i *InternetConfig) SaveInternetConfig() error {
 	var err error
 	f, err := os.Create(ConfigPath)
 
@@ -68,7 +68,7 @@ func (i *InternetConfig) SaveToFile() error {
 	writer := bufio.NewWriter(f)
 
 	// 기본 인터페이스 설정
-	_, err = writer.WriteString("config interface 'wan'\n")
+	_, err = writer.WriteString("config interface 'wan'\n\toption device 'eth0'\n")
 
 	if err != nil {
 		return err
@@ -140,8 +140,8 @@ func (i *InternetConfig) SaveToFile() error {
 	return writer.Flush()
 }
 
-// LoadFromFile OpenWrt UCI 형식의 설정 파일에서 설정 읽기
-func LoadFromFile() (*InternetConfig, error) {
+// LoadNetworkConfig OpenWrt UCI 형식의 설정 파일에서 설정 읽기
+func LoadInternetConfig() (*InternetConfig, error) {
 	f, err := os.Open(ConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open config file: %v", err)

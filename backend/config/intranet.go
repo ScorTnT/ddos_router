@@ -24,8 +24,8 @@ func NewIntranetConfig() *IntranetConfig {
 	}
 }
 
-// SaveToFile OpenWrt UCI 형식으로 설정을 파일에 저장
-func (i *IntranetConfig) SaveToFile() error {
+// SaveIntranetConfig OpenWrt UCI 형식으로 설정을 파일에 저장
+func (i *IntranetConfig) SaveIntranetConfig() error {
 	f, err := os.Create(IntranetConfigPath)
 	if err != nil {
 		return fmt.Errorf("failed to create config file: %v", err)
@@ -35,7 +35,7 @@ func (i *IntranetConfig) SaveToFile() error {
 	writer := bufio.NewWriter(f)
 
 	// 기본 인터페이스 설정
-	_, err = writer.WriteString("config interface 'lan'\n")
+	_, err = writer.WriteString("config interface 'lan'\n\toption device 'br-lan'\n\toption proto 'static'\n")
 	if err != nil {
 		return err
 	}
@@ -59,8 +59,8 @@ func (i *IntranetConfig) SaveToFile() error {
 	return writer.Flush()
 }
 
-// LoadFromFile OpenWrt UCI 형식의 설정 파일에서 설정 읽기
-func (i *IntranetConfig) LoadFromFile() (*IntranetConfig, error) {
+// LoadIntranetConfig OpenWrt UCI 형식의 설정 파일에서 설정 읽기
+func LoadIntranetConfig() (*IntranetConfig, error) {
 	f, err := os.Open(IntranetConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open config file: %v", err)
