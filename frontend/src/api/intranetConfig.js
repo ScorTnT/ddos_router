@@ -1,4 +1,4 @@
-export async function LoadInternetConfig() {
+export async function LoadIntranetConfig() {
     try {
         const response = await fetch(`http://${window.location.hostname}:2024/api/intranet`);
 
@@ -13,7 +13,7 @@ export async function LoadInternetConfig() {
     }
 }
 
-export async function SaveInternetConfig(intranetConfig) {
+export async function SaveIntranetConfig(intranetConfig) {
     try {
         const response = await fetch(`http://${window.location.hostname}:2024/api/intranet`, {
             method: 'POST',
