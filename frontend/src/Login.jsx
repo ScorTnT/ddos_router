@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import {Lock, Person, Visibility, VisibilityOff} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import {attemptLogin} from './api/checkAccount';
+import {attemptLogin} from "./api/checkAccount.js";
 
 const Login = ({setIsLoggedIn}) => {
     const [formData, setFormData] = useState({
@@ -39,8 +39,8 @@ const Login = ({setIsLoggedIn}) => {
         setError('');
 
         try {
-            //const loginSuccess = await attemptLogin(formData.username, formData.password); // 이 둘을 절대 조심
-            const loginSuccess = true;                                                       // 위는 실제 서버에서 로그인 확인, 아래는 무조건 통과
+            const loginSuccess = await attemptLogin(formData.username, formData.password); // 이 둘을 절대 조심
+            //const loginSuccess = true;                                                       // 위는 실제 서버에서 로그인 확인, 아래는 무조건 통과
             if (loginSuccess) {
                 setIsLoggedIn(true);
             } else {
