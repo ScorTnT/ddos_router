@@ -11,7 +11,7 @@ export async function attemptLogin(username, password) {
         const result = await response.text();
         const isLoginSuccessful = result === 'true';
 
-        console.log(isLoginSuccessful ? '로그인 성공' : '로그인 실패');
+        //console.log(isLoginSuccessful ? '로그인 성공' : '로그인 실패');
         return isLoginSuccessful;
 
     } catch {
