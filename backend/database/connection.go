@@ -12,14 +12,19 @@ func Connect(databasePath string) error {
 	var err error
 
 	Connection, err = gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
-
 	if err != nil {
 		return err
 	}
 
-	Connection.AutoMigrate(&models.IntranetConfig{})
-	Connection.AutoMigrate(&models.NetworkConfig{})
-	Connection.AutoMigrate(&models.User{})
+	err = Connection.AutoMigrate(models.Admin{})
+	if err != nil {
+		return err
+	}
+
+	err = InitAdmin()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

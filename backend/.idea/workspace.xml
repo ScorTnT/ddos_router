@@ -5,15 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b1b779df-94c2-44b5-a331-9da27552d852" name="Changes" comment="[백엔드] 설정 파일 관리 모듈을 API에 연동">
+      <change afterPath="$PROJECT_DIR$/controller/auth.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/database/models/admin.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/builds/backend" beforeDir="false" afterPath="$PROJECT_DIR$/builds/backend" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/internet.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/internet.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/intranet.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/intranet.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controller/hook.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/hook.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/intranet.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/intranet.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/login.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controller/network.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/internet.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/track_connection.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/track_connection.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/login.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/user.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/auth.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/connection.go" beforeDir="false" afterPath="$PROJECT_DIR$/database/connection.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/models/intranet_config.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/models/network_config.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/models/user.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
