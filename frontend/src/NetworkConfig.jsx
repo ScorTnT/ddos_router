@@ -19,7 +19,7 @@ import {
 import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 
 function NetworkConfig() {
-    const [connectionType, setConnectionType] = useState("dynamic"); // 동적 IP 방식 기본값
+    const [connectionType, setConnectionType] = useState("dhcp"); // 동적 IP 방식 기본값
     const [ipAddress, setIpAddress] = useState("220.66.87.40");
     const [subnetMask, setSubnetMask] = useState("255.255.255.0");
     const [gateway, setGateway] = useState("220.66.87.2");
@@ -33,7 +33,7 @@ function NetworkConfig() {
     const fetchInternetData = async () => {
         const data = await LoadInternetConfig();
         if (data) {
-            setConnectionType(data.connection_type || "dynamic");
+            setConnectionType(data.connection_type || "dhcp");
             setIpAddress(data.ip_addr || "220.66.87.40");
             setSubnetMask(data.netmask || "255.255.255.0");
             setGateway(data.gateway || "220.66.87.2");
@@ -118,21 +118,21 @@ function NetworkConfig() {
                         value={ipAddress}
                         onChange={(e) => setIpAddress(e.target.value)}
                         fullWidth
-                        disabled={connectionType === "dynamic"} // 동적 IP 방식일 때 비활성화
+                        disabled={connectionType === "dhcp"} // 동적 IP 방식일 때 비활성화
                     />
                     <TextField
                         label="서브넷 마스크"
                         value={subnetMask}
                         onChange={(e) => setSubnetMask(e.target.value)}
                         fullWidth
-                        disabled={connectionType === "dynamic"} // 동적 IP 방식일 때 비활성화
+                        disabled={connectionType === "dhcp"} // 동적 IP 방식일 때 비활성화
                     />
                     <TextField
                         label="기본 게이트웨이"
                         value={gateway}
                         onChange={(e) => setGateway(e.target.value)}
                         fullWidth
-                        disabled={connectionType === "dynamic"} // 동적 IP 방식일 때 비활성화
+                        disabled={connectionType === "dhcp"} // 동적 IP 방식일 때 비활성화
                     />
 
                     <FormControlLabel
