@@ -7,6 +7,7 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
 
 function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("192.168.0.1");

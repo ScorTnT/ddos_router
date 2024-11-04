@@ -16,6 +16,7 @@ import {
     TextField,
     Typography
 } from "@mui/material";
+import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("dynamic"); // 동적 IP 방식 기본값
@@ -29,6 +30,13 @@ function NetworkConfig() {
     const [manualDns, setManualDns] = useState(true);
     const [macAddressChange, setMacAddressChange] = useState(true);
     const [manualMtu, setManualMtu] = useState(false);
+    const fetchInternetData = async () => {
+        const response = await LoadInternetConfig();
+        console.log("response " +response);
+    }
+    useEffect(() => {
+        fetchInternetData();
+    }, []);
 
     // 예시 MAC 주소 리스트
     const macAddressOptions = [
