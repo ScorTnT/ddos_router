@@ -1,6 +1,6 @@
 export async function LoadInternetConfig() {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/api/internet`);
+        const response = await fetch(`http://${window.location.hostname}:2024/api/intranet`);
 
         if (response.ok) {
             return await response.json();
@@ -15,7 +15,7 @@ export async function LoadInternetConfig() {
 
 export async function SaveInternetConfig(intranetConfig) {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/api/internet`, {
+        const response = await fetch(`http://${window.location.hostname}:2024/api/intranet`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
