@@ -8,12 +8,9 @@ export async function attemptLogin(username, password) {
             body: new URLSearchParams({ username, password })
         });
 
-        const result = await response.text();
-        const isLoginSuccessful = result === 'true';
+        console.log(await response.json());
 
-        //console.log(isLoginSuccessful ? '로그인 성공' : '로그인 실패');
-        return isLoginSuccessful;
-
+        return (response.status === 200);
     } catch {
         return false;
     }
