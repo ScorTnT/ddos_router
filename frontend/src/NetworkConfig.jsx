@@ -31,10 +31,43 @@ function NetworkConfig() {
     const [macAddressChange, setMacAddressChange] = useState(true);
     const [manualMtu, setManualMtu] = useState(false);
     const fetchInternetData = async () => {
-        const response = await LoadInternetConfig();
-        console.log("response " +response);
-    }
-    useEffect(() => {
+        const data = await LoadInternetConfig();
+        if (data) {
+            setConnectionType(data.connection_type || "dynamic");
+            setIpAddress(data.ip_addr || "220.66.87.40");
+            setSubnetMask(data.netmask || "255.255.255.0");
+            setGateway(data.gateway || "220.66.87.2");
+            setPrimaryDNS(data.dns_list[0] || "8.8.8.8");
+            setSecondaryDNS(data.dns_list[1] || "8.8.4.4");
+            setWanMacAddress(data.mac_addr || "");
+            setMtu(data.mtu || "1500");
+            setManualDns(data.use_custom_dns || true);
+            setMacAddressChange(data.clone_mac || true);
+            setManualMtu(data.manualMtu || false);
+        }
+    };
+    const saveConfig = async () => {
+        const configData = {
+            connection_type: connectionType,
+            ip_addr: ipAddress,
+            netmask: subnetMask,
+            gateway: gateway,
+            dns_list: [primaryDNS, secondaryDNS],
+            mac_addr: wanMacAddress,
+            mtu: mtu,
+            use_custom_dns: manualDns,
+            clone_mac: macAddressChange,
+            manualMtu: manualMtu,
+        };
+    
+        const result = await SaveInternetConfig(configData);
+        if (result) {
+            alert("설정이 성공적으로 저장되었습니다!");
+        } else {
+            alert("설정 저장에 실패했습니다.");
+        }
+    };
+    useEffect(()=>{
         fetchInternetData();
     }, []);
 
@@ -68,7 +101,7 @@ function NetworkConfig() {
                             sx={{ marginLeft: 2 }}
                         >
                             <FormControlLabel
-                                value="dynamic"
+                                value="dhcp"
                                 control={<Radio />}
                                 label="동적 IP 방식"
                             />
@@ -152,7 +185,7 @@ function NetworkConfig() {
                     />
                 </Stack>
                 <Box mt={3}>
-                    <Button variant="contained" color="primary" fullWidth>
+                    <Button variant="contained" color="primary" fullWidth onClick={saveConfig}>
                         설정 저장
                     </Button>
                 </Box>
