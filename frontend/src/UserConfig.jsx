@@ -16,7 +16,12 @@ function UserConfig() {
     const [newAdminId, setNewAdminId] = useState("");
     const [newAdminPassword, setNewAdminPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-
+    const function (params) {
+        
+    }
+    useEffect(()=>{
+        fetchInternetData();
+    }, []);
     return (
         <Card>
             <CardContent>
