@@ -33,16 +33,16 @@ function NetworkConfig() {
     const fetchInternetData = async () => {
         const data = await LoadInternetConfig();
         if (data) {
-            setConnectionType(data.connection_type || "dhcp");
-            setIpAddress(data.ip_addr || "220.66.87.40");
-            setSubnetMask(data.netmask || "255.255.255.0");
-            setGateway(data.gateway || "220.66.87.2");
-            setPrimaryDNS(data.dns_list[0] || "8.8.8.8");
-            setSecondaryDNS(data.dns_list[1] || "8.8.4.4");
+            setConnectionType(data.connection_type || "error");
+            setIpAddress(data.ip_addr || "error");
+            setSubnetMask(data.netmask || "error");
+            setGateway(data.gateway || "error");
+            setPrimaryDNS(data.dns_list[0] || "error");
+            setSecondaryDNS(data.dns_list[1] || "error");
             setWanMacAddress(data.mac_addr || "");
-            setMtu(data.mtu || "1500");
-            setManualDns(data.use_custom_dns || true);
-            setMacAddressChange(data.clone_mac || true);
+            setMtu(data.mtu || "error");
+            setManualDns(data.use_custom_dns || false);
+            setMacAddressChange(data.clone_mac || false);
             setManualMtu(data.manualMtu || false);
         }
     };
