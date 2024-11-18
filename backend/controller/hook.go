@@ -14,6 +14,7 @@ func HookHandler(app *fiber.App) {
 	app.Post("/internet", SetInternetConfig)
 
 	app.Get("/connections", GetConnections)
+	app.Get("/router_info", GetRouterInfo)
 
 	app.Get("/", Index)
 }
