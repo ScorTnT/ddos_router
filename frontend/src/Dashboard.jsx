@@ -39,7 +39,7 @@ import {getConnections} from './api/getConnections';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
-
+import { getHardware } from './api/hardConfig.js';
 function Dashboard({setIsLoggedIn}) {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -107,7 +107,7 @@ function InfoPanel() {
             console.error('Connection update error:', error);
         }
     };
-
+    
     useEffect(() => {
         fetchConnectionData();
     }, []);
@@ -124,6 +124,7 @@ function InfoPanel() {
         };
     }, [isAutoUpdate]);
 
+    
     const routerInfo = [
         {name: 'MAC 주소', value: '00:11:22:33:44:55'},
         {name: '모델명', value: 'RT-AC86U'},
