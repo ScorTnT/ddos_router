@@ -3,7 +3,6 @@ package utils
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -18,7 +17,7 @@ type RouterInfo struct {
 	Value string `json:"value"`
 }
 
-func GetRouterInfo() ([]byte, error) {
+func GetRouterInfo() ([]RouterInfo, error) {
 	var routerInfo []RouterInfo
 
 	mac, err := getMACAddress("eth0")
@@ -61,7 +60,7 @@ func GetRouterInfo() ([]byte, error) {
 	if err != nil {
 		connected = 0
 	}
-	routerInfo = append(routerInfo, RouterInfo{Name: "연결된 기기 수", Value: fmt.Sprintf("%d대", connected)})
+	routerInfo = append(routerInfo, RouterInfo{Name: "연결된 기기 수", Value: fmt.Sprintf("%d", connected)})
 
 	download, upload, err := getDownloadUploadSpeed()
 	if err != nil {
@@ -70,12 +69,7 @@ func GetRouterInfo() ([]byte, error) {
 	routerInfo = append(routerInfo, RouterInfo{Name: "현재 다운로드 속도", Value: download})
 	routerInfo = append(routerInfo, RouterInfo{Name: "현재 업로드 속도", Value: upload})
 
-	jsonData, err := json.Marshal(routerInfo)
-	if err != nil {
-		return nil, err
-	}
-
-	return jsonData, nil
+	return routerInfo, nil
 }
 
 func getMACAddress(interfaceName string) (string, error) {
@@ -111,25 +105,73 @@ func getFirmwareVersion() (string, error) {
 }
 
 func getCPUUsage() (string, error) {
-	cmd := exec.Command("sh", "-c", "top -bn1 | grep 'Cpu(s)'")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
+	// CPU 사용률을 계산하기 위해 /proc/stat 파일을 읽습니다
+	data1, err := os.ReadFile("/proc/stat")
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(out.String()), nil
+
+	// CPU 통계의 첫 번째 라인을 파싱합니다
+	fields1 := strings.Fields(strings.Split(string(data1), "\n")[0])
+	if len(fields1) < 5 {
+		return "", fmt.Errorf("invalid CPU stats")
+	}
+
+	user1, _ := strconv.ParseUint(fields1[1], 10, 64)
+	nice1, _ := strconv.ParseUint(fields1[2], 10, 64)
+	system1, _ := strconv.ParseUint(fields1[3], 10, 64)
+	idle1, _ := strconv.ParseUint(fields1[4], 10, 64)
+
+	// 1초 대기
+	time.Sleep(time.Second)
+
+	// 두 번째 측정
+	data2, err := os.ReadFile("/proc/stat")
+	if err != nil {
+		return "", err
+	}
+
+	fields2 := strings.Fields(strings.Split(string(data2), "\n")[0])
+	if len(fields2) < 5 {
+		return "", fmt.Errorf("invalid CPU stats")
+	}
+
+	user2, _ := strconv.ParseUint(fields2[1], 10, 64)
+	nice2, _ := strconv.ParseUint(fields2[2], 10, 64)
+	system2, _ := strconv.ParseUint(fields2[3], 10, 64)
+	idle2, _ := strconv.ParseUint(fields2[4], 10, 64)
+
+	// CPU 사용률 계산
+	active1 := user1 + nice1 + system1
+	active2 := user2 + nice2 + system2
+	total1 := active1 + idle1
+	total2 := active2 + idle2
+
+	deltaCPU := active2 - active1
+	deltaTotal := total2 - total1
+
+	if deltaTotal == 0 {
+		return "0.0%", nil
+	}
+
+	cpuUsage := float64(deltaCPU) / float64(deltaTotal) * 100
+	return fmt.Sprintf("%.1f%%", cpuUsage), nil
 }
 
 func getMemoryUsage() (string, error) {
-	cmd := exec.Command("free", "-m")
+	cmd := exec.Command("sh", "-c", "free | grep Mem | awk '{print $3/$2 * 100.0}'")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(out.String()), nil
+	// 숫자만 추출하고 소수점 첫째자리까지만 표시
+	memValue := strings.TrimSpace(out.String())
+	if memFloat, err := strconv.ParseFloat(memValue, 64); err == nil {
+		return fmt.Sprintf("%.1f%%", memFloat), nil
+	}
+	return "", fmt.Errorf("failed to parse memory usage")
 }
 
 func getUptime() (string, error) {
@@ -165,7 +207,13 @@ func getConnectedDevices() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer file.Close()
+
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
 
 	scanner := bufio.NewScanner(file)
 	count := 0
@@ -178,12 +226,61 @@ func getConnectedDevices() (int, error) {
 	if err := scanner.Err(); err != nil {
 		return 0, err
 	}
-	// 헤더를 제외하기 위해 1을 빼줍니다.
-	return count - 1, nil
+	return count, nil
 }
 
 func getDownloadUploadSpeed() (string, string, error) {
-	// 실제 속도 측정을 위한 구현이 필요합니다.
-	// 예시에서는 고정된 값을 반환합니다.
-	return "50Mbps", "20Mbps", nil
+	// 첫 번째 측정
+	rx1, tx1, err := getNetworkStats("eth0")
+	if err != nil {
+		return "", "", err
+	}
+
+	// 1초 대기
+	time.Sleep(time.Second)
+
+	// 두 번째 측정
+	rx2, tx2, err := getNetworkStats("eth0")
+	if err != nil {
+		return "", "", err
+	}
+
+	// 초당 속도 계산 (bytes/s를 Mbps로 변환)
+	downloadSpeed := float64(rx2-rx1) * 8 / 1000000 // bytes to Mbps
+	uploadSpeed := float64(tx2-tx1) * 8 / 1000000   // bytes to Mbps
+
+	return fmt.Sprintf("%.1f", downloadSpeed), fmt.Sprintf("%.1f", uploadSpeed), nil
+}
+
+func getNetworkStats(interface_name string) (uint64, uint64, error) {
+	data, err := os.ReadFile("/proc/net/dev")
+	if err != nil {
+		return 0, 0, err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(string(data)))
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, interface_name) {
+			fields := strings.Fields(line)
+			if len(fields) < 10 {
+				return 0, 0, fmt.Errorf("invalid format in /proc/net/dev")
+			}
+
+			// fields[1]은 수신 bytes, fields[9]는 송신 bytes
+			rx, err := strconv.ParseUint(fields[1], 10, 64)
+			if err != nil {
+				return 0, 0, err
+			}
+
+			tx, err := strconv.ParseUint(fields[9], 10, 64)
+			if err != nil {
+				return 0, 0, err
+			}
+
+			return rx, tx, nil
+		}
+	}
+
+	return 0, 0, fmt.Errorf("interface %s not found", interface_name)
 }
