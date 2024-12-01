@@ -36,7 +36,7 @@ import {
 } from '@mui/icons-material';
 import PropTypes from "prop-types";
 import {getConnections} from './api/getConnections';
-import { getRouterInfo } from '../api/getRouterInfo';
+import { getRouterInfo } from './api/getRouterInfo';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
