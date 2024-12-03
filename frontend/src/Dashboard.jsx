@@ -137,17 +137,17 @@ function InfoPanel() {
         };
     }, [isAutoUpdate]);
 
-    const routerInfo = [
-        {name: 'MAC 주소', value: '00:11:22:33:44:55'},
-        {name: '모델명', value: 'RT-AC86U'},
-        {name: '펌웨어 버전', value: '3.0.0.4.386_45899'},
-        {name: 'CPU 사용률', value: '25%'},
-        {name: '메모리 사용률', value: '45%'},
-        {name: '가동 시간', value: '10일 5시간 30분'},
-        {name: '연결된 기기 수', value: '8대'},
-        {name: '현재 다운로드 속도', value: '50Mbps'},
-        {name: '현재 업로드 속도', value: '20Mbps'}
-    ];
+    // const routerInfo = [
+    //     {name: 'MAC 주소', value: '00:11:22:33:44:55'},
+    //     {name: '모델명', value: 'RT-AC86U'},
+    //     {name: '펌웨어 버전', value: '3.0.0.4.386_45899'},
+    //     {name: 'CPU 사용률', value: '25%'},
+    //     {name: '메모리 사용률', value: '45%'},
+    //     {name: '가동 시간', value: '10일 5시간 30분'},
+    //     {name: '연결된 기기 수', value: '8대'},
+    //     {name: '현재 다운로드 속도', value: '50Mbps'},
+    //     {name: '현재 업로드 속도', value: '20Mbps'}
+    // ];
 
     return (
         <Stack spacing={3}>
