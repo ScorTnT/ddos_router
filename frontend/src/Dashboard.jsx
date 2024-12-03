@@ -97,14 +97,19 @@ function InfoPanel() {
 
     const fetchRouterInfo = async () => {
         try {
-            const routerData = await getRouterInfo();
+            const [routerData, connectionsData] = await Promise.all([
+                getRouterInfo(),
+                getConnections()
+            ]);
+
             if (routerData) {
                 setRouterInfo(routerData);
-                setConnectionLog(routerData.packet_logs || '로그 정보 없음');
                 setUpdateError(null);
-            } else {
-                setUpdateError('데이터를 불러올 수 없습니다.');
             }
+
+            // 연결 로그 업데이트
+            setConnectionLog(connectionsData || '로그 정보 없음');
+
         } catch (error) {
             setUpdateError('라우터 정보 업데이트 중 오류가 발생했습니다.');
             console.error('Router info update error:', error);
