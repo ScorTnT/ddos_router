@@ -15,6 +15,7 @@ func HookHandler(app *fiber.App) {
 
 	app.Get("/connections", GetConnections)
 	app.Get("/router_info", GetRouterInfo)
+	app.Get("/arp", GetArpPing)
 
 	app.Get("/", Index)
 }
