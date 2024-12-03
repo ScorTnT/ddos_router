@@ -134,27 +134,29 @@ function InfoPanel() {
 
     return (
         <Stack spacing={3}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" mb={2}>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={isAutoUpdate}
+                            onChange={() => setIsAutoUpdate(!isAutoUpdate)}
+                            color="primary"
+                        />
+                    }
+                    label="자동 업데이트"
+                />
+                <Tooltip title="수동 업데이트">
+                    <IconButton onClick={fetchRouterInfo}>
+                        <RefreshIcon />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
             <Card>
                 <CardContent>
-                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                        <Typography variant="h6">패킷 통신 로그</Typography>
-                        <Box>
-                            <Tooltip title={isAutoUpdate ? "자동 업데이트 중지" : "자동 업데이트 시작"}>
-                                <IconButton
-                                    onClick={() => setIsAutoUpdate(!isAutoUpdate)}
-                                    color={isAutoUpdate ? "primary" : "default"}
-                                >
-                                    <AutoUpdateIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="수동 업데이트">
-                                <IconButton onClick={fetchRouterInfo}>
-                                    <RefreshIcon />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                    </Box>
-
+                    <Typography variant="h6" gutterBottom>
+                        패킷 통신 로그
+                    </Typography>
                     <TextField
                         fullWidth
                         multiline
