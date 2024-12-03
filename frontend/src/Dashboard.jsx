@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import {
     AppBar,
     Box,
@@ -35,13 +35,13 @@ import {
     Speed as SpeedIcon
 } from '@mui/icons-material';
 import PropTypes from "prop-types";
-import {getConnections} from './api/getConnections';
+import { getConnections } from './api/getConnections';
 import { getRouterInfo } from './api/getRouterInfo';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
 import { getHardware } from './api/hardConfig.js';
-function Dashboard({setIsLoggedIn}) {
+function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -53,16 +53,16 @@ function Dashboard({setIsLoggedIn}) {
     };
 
     return (
-        <Box sx={{flexGrow: 1}}>
+        <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         라우터 관리 시스템
                     </Typography>
                     <Button
                         color="inherit"
                         onClick={handleLogout}
-                        startIcon={<LogoutIcon/>}
+                        startIcon={<LogoutIcon />}
                     >
                         로그아웃
                     </Button>
@@ -70,9 +70,9 @@ function Dashboard({setIsLoggedIn}) {
                 <Tabs
                     value={currentTab}
                     onChange={handleTabChange}
-                    sx={{backgroundColor: 'primary.dark'}}
+                    sx={{ backgroundColor: 'primary.dark' }}
                 >
-                    <Tab icon={<SpeedIcon/>} label="정보"/>
+                    <Tab icon={<SpeedIcon />} label="정보" />
                     <Tab icon={<SettingsIcon />} label="네트워크 기본 설정" />
                     <Tab icon={<SettingsIcon />} label="내부 네트워크 설정" />
                     <Tab icon={<SettingsIcon />} label="관리자 설정" />
@@ -99,17 +99,7 @@ function InfoPanel() {
         try {
             const routerData = await getRouterInfo();
             if (routerData) {
-                setRouterInfo([
-                    { name: 'MAC 주소', value: routerData.mac_address || '알 수 없음' },
-                    { name: '모델명', value: routerData.model_name || '알 수 없음' },
-                    { name: '펌웨어 버전', value: routerData.firmware_version || '알 수 없음' },
-                    { name: 'CPU 사용률', value: `${routerData.cpu_usage || 0}%` },
-                    { name: '메모리 사용률', value: `${routerData.memory_usage || 0}%` },
-                    { name: '가동 시간', value: routerData.uptime || '알 수 없음' },
-                    { name: '연결된 기기 수', value: `${routerData.connected_devices || 0}대` },
-                    { name: '현재 다운로드 속도', value: `${routerData.download_speed || 0}Mbps` },
-                    { name: '현재 업로드 속도', value: `${routerData.upload_speed || 0}Mbps` },
-                ]);
+                setRouterInfo(routerData);
                 setConnectionLog(routerData.packet_logs || '로그 정보 없음');
                 setUpdateError(null);
             } else {
@@ -120,7 +110,7 @@ function InfoPanel() {
             console.error('Router info update error:', error);
         }
     };
-    
+
     useEffect(() => {
         fetchRouterInfo();
     }, []);
@@ -136,18 +126,6 @@ function InfoPanel() {
             }
         };
     }, [isAutoUpdate]);
-
-    const routerInfo = [
-        {name: 'MAC 주소', value: '00:11:22:33:44:55'},
-        {name: '모델명', value: 'RT-AC86U'},
-        {name: '펌웨어 버전', value: '3.0.0.4.386_45899'},
-        {name: 'CPU 사용률', value: '25%'},
-        {name: '메모리 사용률', value: '45%'},
-        {name: '가동 시간', value: '10일 5시간 30분'},
-        {name: '연결된 기기 수', value: '8대'},
-        {name: '현재 다운로드 속도', value: '50Mbps'},
-        {name: '현재 업로드 속도', value: '20Mbps'}
-    ];
 
     return (
         <Stack spacing={3}>
