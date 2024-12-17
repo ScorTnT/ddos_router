@@ -1,4 +1,3 @@
-// src/api/getRouterInfo.js
 export async function getRouterInfo() {
     try {
         const response = await fetch('http://greatmandu.asuscomm.com:2024/router_info');

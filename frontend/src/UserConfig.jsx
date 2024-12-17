@@ -12,17 +12,11 @@ import {
 import { adminConfig, SaveAdminConfig } from './api/adminConfig';
 
 function UserConfig() {
-    const [adminId, setAdminId] = useState("root"); // 현재 관리자 계정 (예시: root)
+    const [adminId, setAdminId] = useState("admin"); // 현재 관리자 계정 (예시: root)
     const [newAdminId, setNewAdminId] = useState("");
     const [newAdminPassword, setNewAdminPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     
-    const funcion1 = () =>{
-
-    };
-    useEffect(()=>{
-
-    }, []);
     return (
         <Card>
             <CardContent>
