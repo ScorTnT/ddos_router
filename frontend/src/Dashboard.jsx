@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import {
     AppBar,
     Box,
@@ -35,11 +35,13 @@ import {
     Speed as SpeedIcon
 } from '@mui/icons-material';
 import PropTypes from "prop-types";
+import { getConnections } from './api/getConnections';
 import { getRouterInfo } from './api/getRouterInfo';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
-function Dashboard({setIsLoggedIn}) {
+import { getHardware } from './api/hardConfig.js';
+function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -51,16 +53,16 @@ function Dashboard({setIsLoggedIn}) {
     };
 
     return (
-        <Box sx={{flexGrow: 1}}>
+        <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         라우터 관리 시스템
                     </Typography>
                     <Button
                         color="inherit"
                         onClick={handleLogout}
-                        startIcon={<LogoutIcon/>}
+                        startIcon={<LogoutIcon />}
                     >
                         로그아웃
                     </Button>
@@ -68,9 +70,9 @@ function Dashboard({setIsLoggedIn}) {
                 <Tabs
                     value={currentTab}
                     onChange={handleTabChange}
-                    sx={{backgroundColor: 'primary.dark'}}
+                    sx={{ backgroundColor: 'primary.dark' }}
                 >
-                    <Tab icon={<SpeedIcon/>} label="정보"/>
+                    <Tab icon={<SpeedIcon />} label="정보" />
                     <Tab icon={<SettingsIcon />} label="네트워크 기본 설정" />
                     <Tab icon={<SettingsIcon />} label="내부 네트워크 설정" />
                     <Tab icon={<SettingsIcon />} label="관리자 설정" />
@@ -95,30 +97,25 @@ function InfoPanel() {
 
     const fetchRouterInfo = async () => {
         try {
-            const routerData = await getRouterInfo();
+            const [routerData, connectionsData] = await Promise.all([
+                getRouterInfo(),
+                getConnections()
+            ]);
+
             if (routerData) {
-                setRouterInfo([
-                    { name: 'MAC 주소', value: routerData.mac_address || '알 수 없음' },
-                    { name: '모델명', value: routerData.model_name || '알 수 없음' },
-                    { name: '펌웨어 버전', value: routerData.firmware_version || '알 수 없음' },
-                    { name: 'CPU 사용률', value: `${routerData.cpu_usage || 0}%` },
-                    { name: '메모리 사용률', value: `${routerData.memory_usage || 0}%` },
-                    { name: '가동 시간', value: routerData.uptime || '알 수 없음' },
-                    { name: '연결된 기기 수', value: `${routerData.connected_devices || 0}대` },
-                    { name: '현재 다운로드 속도', value: `${routerData.download_speed || 0}Mbps` },
-                    { name: '현재 업로드 속도', value: `${routerData.upload_speed || 0}Mbps` },
-                ]);
-                setConnectionLog(routerData.packet_logs || '로그 정보 없음');
+                setRouterInfo(routerData);
                 setUpdateError(null);
-            } else {
-                setUpdateError('데이터를 불러올 수 없습니다.');
             }
+
+            // 연결 로그 업데이트
+            setConnectionLog(connectionsData || '로그 정보 없음');
+
         } catch (error) {
             setUpdateError('라우터 정보 업데이트 중 오류가 발생했습니다.');
             console.error('Router info update error:', error);
         }
     };
-    
+
     useEffect(() => {
         fetchRouterInfo();
     }, []);
@@ -137,27 +134,29 @@ function InfoPanel() {
 
     return (
         <Stack spacing={3}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" mb={2}>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={isAutoUpdate}
+                            onChange={() => setIsAutoUpdate(!isAutoUpdate)}
+                            color="primary"
+                        />
+                    }
+                    label="자동 업데이트"
+                />
+                <Tooltip title="수동 업데이트">
+                    <IconButton onClick={fetchRouterInfo}>
+                        <RefreshIcon />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
             <Card>
                 <CardContent>
-                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                        <Typography variant="h6">패킷 통신 로그</Typography>
-                        <Box>
-                            <Tooltip title={isAutoUpdate ? "자동 업데이트 중지" : "자동 업데이트 시작"}>
-                                <IconButton
-                                    onClick={() => setIsAutoUpdate(!isAutoUpdate)}
-                                    color={isAutoUpdate ? "primary" : "default"}
-                                >
-                                    <AutoUpdateIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="수동 업데이트">
-                                <IconButton onClick={fetchRouterInfo}>
-                                    <RefreshIcon />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                    </Box>
-
+                    <Typography variant="h6" gutterBottom>
+                        패킷 통신 로그
+                    </Typography>
                     <TextField
                         fullWidth
                         multiline
