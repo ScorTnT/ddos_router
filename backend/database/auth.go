@@ -54,12 +54,13 @@ func InitAdmin() error {
 
 // CreateDefaultAdmin creates the default admin account
 func CreateDefaultAdmin() error {
-	defaultUsername := "admin"
+	defaultUsername := RouterConfig.InitialAdmin.Username
 	if !ValidateUsername(defaultUsername) {
 		return errors.New("invalid default username format")
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("zoqtmxhs2024!"), bcryptCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(RouterConfig.InitialAdmin.Password), bcryptCost)
+
 	if err != nil {
 		return err
 	}

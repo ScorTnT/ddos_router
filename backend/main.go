@@ -1,12 +1,13 @@
 package main
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
 
+	"github.com/ScorTnT/ddos_router/backend/config"
 	"github.com/ScorTnT/ddos_router/backend/controller"
 	"github.com/ScorTnT/ddos_router/backend/database"
-	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -16,7 +17,16 @@ func main() {
 	}))
 	controller.HookHandler(app)
 
-	err := database.Connect("example.db")
+	var err error
+
+	routerConfig, err := config.ReadConfig()
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	err = database.Init("secure_router.db", routerConfig)
 
 	if err != nil {
 		panic(err)
