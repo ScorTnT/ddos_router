@@ -195,8 +195,14 @@ function InfoPanel() {
                     <Typography variant="h6" gutterBottom>
                         패킷 통신 로그
                     </Typography>
-                    <TableContainer component={Paper}>
-                        <Table>
+                    <TableContainer
+                        component={Paper}
+                        sx={{
+                            maxHeight: '300px', // 제한된 높이 설정
+                            overflowY: 'auto', // 수직 스크롤 활성화
+                        }}
+                    >
+                        <Table stickyHeader>
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 'bold' }}>프로토콜</TableCell>
