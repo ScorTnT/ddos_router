@@ -54,32 +54,35 @@ function Dashboard({ setIsLoggedIn }) {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
-                <Toolbar>
-                    <Typography 
+            <Toolbar>
+                <Typography 
                     variant="h6" 
                     component="div" 
-                    sx={{ flexGrow: 1 }}>
+                    sx={{ flexGrow: 1 }}
+                >
                     라우터 관리 시스템
-                        <Typography
-                        variant="subtitle1"
-                        component="a"
-                        href="/api"
-                        sx={{
-                            textDecoration: 'none',
-                            color: 'inherit',
-                            ml: 2,
-                        }}>
-                        API
-                        </Typography>
-                    </Typography>
-                    <Button
-                        color="inherit"
-                        onClick={handleLogout}
-                        startIcon={<LogoutIcon />}
-                    >
-                        로그아웃
-                    </Button>
-                </Toolbar>
+                </Typography>
+
+                <Button
+                    color="inherit"
+                    href="/api"
+                    sx={{
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        marginRight: 2,
+                    }}
+                >
+                    API
+                </Button>
+
+                <Button
+                    color="inherit"
+                    onClick={handleLogout}
+                    startIcon={<LogoutIcon />}
+                >
+                    로그아웃
+                </Button>
+            </Toolbar>
                 <Tabs
                     value={currentTab}
                     onChange={handleTabChange}
