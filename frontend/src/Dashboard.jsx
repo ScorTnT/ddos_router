@@ -40,7 +40,6 @@ import { getRouterInfo } from './api/getRouterInfo';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
-import { getHardware } from './api/hardConfig.js';
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -56,8 +55,22 @@ function Dashboard({ setIsLoggedIn }) {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        라우터 관리 시스템
+                    <Typography 
+                    variant="h6" 
+                    component="div" 
+                    sx={{ flexGrow: 1 }}>
+                    라우터 관리 시스템
+                        <Typography
+                        variant="subtitle1"
+                        component="a"
+                        href="/api"
+                        sx={{
+                            textDecoration: 'none',
+                            color: 'inherit',
+                            ml: 2,
+                        }}>
+                        API
+                        </Typography>
                     </Typography>
                     <Button
                         color="inherit"
