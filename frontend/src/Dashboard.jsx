@@ -107,9 +107,11 @@ function InfoPanel() {
                 setUpdateError(null);
             }
 
+            //setConnectionLog(connectionsData || '로그 정보 없음');
             // 연결 로그 업데이트
-            setConnectionLog(connectionsData || '로그 정보 없음');
-
+            if (Array.isArray(connectionsData)) setConnectionLog(connectionsData);
+            else setConnectionLog('로그 정보 없음');
+        
         } catch (error) {
             setUpdateError('라우터 정보 업데이트 중 오류가 발생했습니다.');
             console.error('Router info update error:', error);
@@ -152,7 +154,7 @@ function InfoPanel() {
                 </Tooltip>
             </Box>
 
-            <Card>
+            {/* <Card>
                 <CardContent>
                     <Typography variant="h6" gutterBottom>
                         패킷 통신 로그
@@ -186,8 +188,44 @@ function InfoPanel() {
                         </Typography>
                     )}
                 </CardContent>
-            </Card>
+            </Card> */}
 
+            <Card>
+                <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                        패킷 통신 로그
+                    </Typography>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>프로토콜</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>출발 IP</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>도착 IP</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>출발 포트</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>도착 포트</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>패킷 수</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>바이트 수</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {connectionLog.map((log, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{log.protocol}</TableCell>
+                                        <TableCell>{log.source_ip}</TableCell>
+                                        <TableCell>{log.dest_ip}</TableCell>
+                                        <TableCell>{log.source_port}</TableCell>
+                                        <TableCell>{log.dest_port}</TableCell>
+                                        <TableCell>{log.packet_count}</TableCell>
+                                        <TableCell>{log.byte_count}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </CardContent>
+            </Card>
+        
             <Card>
                 <CardContent>
                     <Typography variant="h6" gutterBottom>
