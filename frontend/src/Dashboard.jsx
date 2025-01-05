@@ -91,7 +91,7 @@ function Dashboard({ setIsLoggedIn }) {
 
 function InfoPanel() {
     const [routerInfo, setRouterInfo] = useState([]);
-    const [connectionLog, setConnectionLog] = useState('연결 정보를 불러오는 중...');
+    const [connectionLog, setConnectionLog] = useState([]);
     const [isAutoUpdate, setIsAutoUpdate] = useState(true);
     const [updateError, setUpdateError] = useState(null);
 
@@ -110,7 +110,7 @@ function InfoPanel() {
             //setConnectionLog(connectionsData || '로그 정보 없음');
             // 연결 로그 업데이트
             if (Array.isArray(connectionsData)) setConnectionLog(connectionsData);
-            else setConnectionLog('로그 정보 없음');
+            else setConnectionLog([]);
         
         } catch (error) {
             setUpdateError('라우터 정보 업데이트 중 오류가 발생했습니다.');
@@ -209,17 +209,34 @@ function InfoPanel() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {connectionLog.map((log, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{log.protocol}</TableCell>
-                                        <TableCell>{log.source_ip}</TableCell>
-                                        <TableCell>{log.dest_ip}</TableCell>
-                                        <TableCell>{log.source_port}</TableCell>
-                                        <TableCell>{log.dest_port}</TableCell>
-                                        <TableCell>{log.packet_count}</TableCell>
-                                        <TableCell>{log.byte_count}</TableCell>
+                                { updateError ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center">
+                                            <Typography color="error" variant="body1">
+                                                {updateError}
+                                            </Typography>
+                                        </TableCell>
                                     </TableRow>
-                                ))}
+                                ) : connectionLog.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center">
+                                            연결 정보가 없습니다.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    // 정상적으로 데이터가 있을 경우
+                                    connectionLog.map((log, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{log.protocol}</TableCell>
+                                            <TableCell>{log.source_ip}</TableCell>
+                                            <TableCell>{log.dest_ip}</TableCell>
+                                            <TableCell>{log.source_port}</TableCell>
+                                            <TableCell>{log.dest_port}</TableCell>
+                                            <TableCell>{log.packet_count}</TableCell>
+                                            <TableCell>{log.byte_count}</TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>
