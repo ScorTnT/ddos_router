@@ -1,11 +1,11 @@
 # How to build ?
 
 ```bash
+> screen 1
 cd ~/backend
-go mod tidy
-go build -o backend_app
-./backend_app
+./build.bat
 
+> screen 2
 cd ~/frontend 
 npm install
 npm run dev
