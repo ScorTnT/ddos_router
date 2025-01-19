@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import {Lock, Person, Visibility, VisibilityOff} from '@mui/icons-material';
 import PropTypes from 'prop-types';
+import { attemptLogin } from './api/checkAccount';
 
 const Login = ({setIsLoggedIn}) => {
     const [formData, setFormData] = useState({

@@ -126,8 +126,6 @@ function InfoPanel() {
                 setUpdateError(null);
             }
 
-            //setConnectionLog(connectionsData || '로그 정보 없음');
-            // 연결 로그 업데이트
             if (Array.isArray(connectionsData)) setConnectionLog(connectionsData);
             else setConnectionLog([]);
         
@@ -172,42 +170,6 @@ function InfoPanel() {
                     </IconButton>
                 </Tooltip>
             </Box>
-
-            {/* <Card>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                        패킷 통신 로그
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={10}
-                        variant="outlined"
-                        value={updateError || connectionLog}
-                        InputProps={{
-                            readOnly: true,
-                            style: {
-                                fontFamily: 'monospace',
-                                fontSize: '0.875rem',
-                            },
-                        }}
-                        error={!!updateError}
-                        sx={{
-                            backgroundColor: 'background.paper',
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: updateError ? 'error.main' : 'rgba(0, 0, 0, 0.23)',
-                                },
-                            },
-                        }}
-                    />
-                    {updateError && (
-                        <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                            {updateError}
-                        </Typography>
-                    )}
-                </CardContent>
-            </Card> */}
 
             <Card>
                 <CardContent>
