@@ -10,8 +10,6 @@ cd ~/frontend
 npm install
 npm run dev
 ```
-
-```bash
-backend listening port : 2024
-frontend listening port : 5173 
-```
+# listening port
+backend : 2024<br>
+frontend : 5173 <br>
