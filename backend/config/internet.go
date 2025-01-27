@@ -1,237 +1,211 @@
 package config
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
-	"os"
+	"net"
+	"os/exec"
+	"strconv"
 	"strings"
 )
 
-// ConnectionType 인터넷 연결 타입
-type ConnectionType string
+type InternetConfig struct {
+	Proto       string   `json:"connection_type"`
+	IPAddr      string   `json:"ip_addr"`
+	Netmask     string   `json:"netmask"`
+	Gateway     string   `json:"gateway"`
+	IsCustomDNS bool     `json:"is_custom_dns"`
+	DNSList     []string `json:"dns_list"`
+	IsCustomMAC bool     `json:"is_custom_mac"`
+	MACAddr     string   `json:"mac_addr"`
+	MTU         int      `json:"mtu"`
+}
 
-const (
-	DynamicIP ConnectionType = "dhcp"
-	StaticIP  ConnectionType = "static"
+const interfaceName = "wan"
+
+var (
+	InvalidConfigError = errors.New("invalid config data")
+	LoadConfigError    = errors.New("failed to load config")
 )
 
-const ConfigPath string = "/etc/config/custom_network/internet"
-
-// InternetConfig OpenWrt 인터넷 연결 설정을 위한 구조체
-type InternetConfig struct {
-	// 네트워크 프로토콜 설정
-	Proto ConnectionType `json:"connection_type"` // 'dhcp' 또는 'static'
-
-	// IP 설정
-	IpAddr  string `json:"ip_addr"` // xxx.xxx.xxx.xxx 형식
-	Netmask string `json:"netmask"` // xxx.xxx.xxx.xxx 형식
-	Gateway string `json:"gateway"` // xxx.xxx.xxx.xxx 형식
-
-	// DNS 설정
-	DNS          []string `json:"dns_list"`       // DNS 서버 목록
-	UseCustomDNS bool     `json:"use_custom_dns"` // DNS 커스텀 설정 여부
-
-	// MAC 주소 설정
-	MACAddr  string `json:"mac_addr"`  // XX:XX:XX:XX:XX:XX 형식
-	CloneMAC bool   `json:"clone_mac"` // MAC 주소 변경 사용 여부
-
-	// MTU 설정
-	MTU int `json:"mtu"` // MTU 값
-}
-
-// NewInternetConfig 기본값으로 초기화된 인터넷 설정 구조체 생성
-func NewInternetConfig() *InternetConfig {
-	return &InternetConfig{
-		Proto:        DynamicIP,
-		IpAddr:       "",
-		Netmask:      "",
-		Gateway:      "",
-		DNS:          []string{},
-		UseCustomDNS: false,
-		MACAddr:      "",
-		CloneMAC:     false,
-		MTU:          1500,
-	}
-}
-
-// SaveNetworkConfig OpenWrt UCI 형식으로 설정을 파일에 저장
-func (i *InternetConfig) SaveInternetConfig() error {
-	var err error
-	f, err := os.Create(ConfigPath)
-
-	if err != nil {
-		return fmt.Errorf("failed to create config file: %v", err)
-	}
-
-	defer f.Close()
-
-	writer := bufio.NewWriter(f)
-
-	// 기본 인터페이스 설정
-	_, err = writer.WriteString("config interface 'wan'\n\toption device 'eth0'\n")
-
-	if err != nil {
-		return err
-	}
-
-	_, err = writer.WriteString(fmt.Sprintf("\toption proto '%s'\n", i.Proto))
-
-	if err != nil {
-		return err
-	}
-
-	// IP 관련 설정
-	if i.Proto == StaticIP {
-		if i.IpAddr != "" {
-			_, err := writer.WriteString(fmt.Sprintf("\toption ipaddr '%s'\n", i.IpAddr))
-
-			if err != nil {
-				return err
-			}
-		}
-		if i.Netmask != "" {
-			_, err := writer.WriteString(fmt.Sprintf("\toption netmask '%s'\n", i.Netmask))
-
-			if err != nil {
-				return err
-			}
-		}
-		if i.Gateway != "" {
-			_, err := writer.WriteString(fmt.Sprintf("\toption gateway '%s'\n", i.Gateway))
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// DNS 설정
-	if i.UseCustomDNS {
-		_, err := writer.WriteString("\toption peerdns '0'\n")
-
-		if err != nil {
-			return err
-		}
-
-		for idx, dns := range i.DNS {
-			_, err := writer.WriteString(fmt.Sprintf("\toption dns_%d '%s'\n", idx+1, dns))
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// MAC 주소 설정
-	if i.CloneMAC && i.MACAddr != "" {
-		_, err := writer.WriteString(fmt.Sprintf("\toption macaddr '%s'\n", i.MACAddr))
-		if err != nil {
-			return err
-		}
-	}
-
-	// MTU 설정
-	if i.MTU != 1500 {
-		_, err := writer.WriteString(fmt.Sprintf("\toption mtu '%d'\n", i.MTU))
-		if err != nil {
-			return err
-		}
-	}
-
-	return writer.Flush()
-}
-
-// LoadNetworkConfig OpenWrt UCI 형식의 설정 파일에서 설정 읽기
 func LoadInternetConfig() (*InternetConfig, error) {
-	f, err := os.Open(ConfigPath)
+	config := &InternetConfig{}
+
+	// Load protocol type
+	proto, err := getUCIValue(fmt.Sprintf("network.%s.proto", interfaceName))
 	if err != nil {
-		return nil, fmt.Errorf("failed to open config file: %v", err)
+		return nil, errors.Join(LoadConfigError, err)
 	}
-	defer f.Close()
+	config.Proto = proto
 
-	config := NewInternetConfig()
-	scanner := bufio.NewScanner(f)
-
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
+	// Load IP address, netmask, and gateway for static configuration
+	if proto == "static" {
+		ipaddr, err := getUCIValue(fmt.Sprintf("network.%s.ipaddr", interfaceName))
+		if err != nil {
+			return nil, errors.Join(LoadConfigError, err)
 		}
+		config.IPAddr = ipaddr
 
-		// option 라인 파싱
-		if strings.HasPrefix(line, "option") {
-			parts := strings.Fields(line)
-			if len(parts) < 3 {
-				continue
-			}
+		netmask, err := getUCIValue(fmt.Sprintf("network.%s.netmask", interfaceName))
+		if err != nil {
+			return nil, errors.Join(LoadConfigError, err)
+		}
+		config.Netmask = netmask
 
-			// 따옴표 제거
-			value := strings.Trim(strings.Join(parts[2:], " "), "'")
+		gateway, err := getUCIValue(fmt.Sprintf("network.%s.gateway", interfaceName))
+		if err != nil {
+			return nil, errors.Join(LoadConfigError, err)
+		}
+		config.Gateway = gateway
+	}
 
-			switch parts[1] {
-			case "proto":
-				config.Proto = ConnectionType(value)
-			case "ipaddr":
-				config.IpAddr = value
-			case "netmask":
-				config.Netmask = value
-			case "gateway":
-				config.Gateway = value
-			case "peerdns":
-				config.UseCustomDNS = value != "0"
-			case "macaddr":
-				config.MACAddr = value
-				config.CloneMAC = true
-			case "mtu":
-				_, err := fmt.Sscanf(value, "%d", &config.MTU)
-				if err != nil {
-					return nil, err
-				}
-			}
+	// Load DNS settings
+	dns, err := getUCIValue(fmt.Sprintf("network.%s.dns", interfaceName))
+	if err == nil && dns != "" {
+		config.IsCustomDNS = true
+		config.DNSList = strings.Fields(dns)
+	}
 
-			// DNS 서버 파싱
-			if strings.HasPrefix(parts[1], "dns_") {
-				config.DNS = append(config.DNS, value)
-			}
+	// Load MAC address
+	macaddr, err := getUCIValue(fmt.Sprintf("network.%s.macaddr", interfaceName))
+	if err == nil && macaddr != "" {
+		config.IsCustomMAC = true
+		config.MACAddr = macaddr
+	}
+
+	// Load MTU
+	mtu, err := getUCIValue(fmt.Sprintf("network.%s.mtu", interfaceName))
+	if err == nil && mtu != "" {
+		mtuValue, err := strconv.Atoi(mtu)
+		if err == nil {
+			config.MTU = mtuValue
 		}
 	}
 
-	return config, scanner.Err()
+	return config, nil
 }
 
-// SetIPAddress IP 주소 설정 (xxx.xxx.xxx.xxx 형식)
-func (i *InternetConfig) SetIPAddress(ip string) error {
-	parts := strings.Split(ip, ".")
-	if len(parts) != 4 {
-		return fmt.Errorf("invalid IP address format")
+func ApplyInternetConfig(config *InternetConfig) error {
+	if config.Proto != "dhcp" && config.Proto != "static" {
+		return errors.Join(InvalidConfigError, fmt.Errorf("invalid internet protocol: %s", config.Proto))
 	}
-	i.IpAddr = ip
+
+	var applyCommands []string
+
+	applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.proto='%s'", interfaceName, config.Proto))
+
+	if config.Proto == "static" {
+		if config.IPAddr != "" {
+			err := checkValidIP(config.IPAddr)
+
+			if err != nil {
+				return errors.Join(InvalidConfigError, err)
+			}
+
+			applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.ipaddr='%s'", interfaceName, config.IPAddr))
+		} else {
+			return errors.Join(InvalidConfigError, fmt.Errorf("ip address value is required"))
+		}
+
+		if config.Netmask != "" {
+			err := checkValidIP(config.Netmask)
+
+			if err != nil {
+				return errors.Join(InvalidConfigError, err)
+			}
+
+			applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.netmask='%s'", interfaceName, config.Netmask))
+		} else {
+			return errors.Join(InvalidConfigError, fmt.Errorf("netmask value is required"))
+		}
+
+		if config.Gateway != "" {
+			err := checkValidIP(config.Gateway)
+
+			if err != nil {
+				return errors.Join(InvalidConfigError, err)
+			}
+
+			applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.gateway='%s'", interfaceName, config.Gateway))
+		} else {
+			return errors.Join(InvalidConfigError, fmt.Errorf("gateway value is required"))
+		}
+	}
+
+	if config.IsCustomDNS && len(config.DNSList) > 0 {
+		for _, dns := range config.DNSList {
+			err := checkValidIP(dns)
+
+			if err != nil {
+				return errors.Join(InvalidConfigError, err)
+			}
+		}
+
+		dnsValues := strings.Join(config.DNSList, " ")
+		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.dns=%s", interfaceName, dnsValues))
+	}
+
+	if config.IsCustomMAC && config.MACAddr != "" {
+		err := checkValidMAC(config.MACAddr)
+
+		if err != nil {
+			return errors.Join(InvalidConfigError, err)
+		}
+
+		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.macaddr=%s", interfaceName, config.MACAddr))
+	}
+
+	if config.MTU > 0 {
+		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.mtu=%d", interfaceName, config.MTU))
+	}
+
+	for _, command := range applyCommands {
+		cmd := exec.Command("uci", strings.Split(command, " ")...)
+		if err := cmd.Run(); err != nil {
+			return errors.Join(InvalidConfigError, fmt.Errorf("failed to run uci command, %s: %v", cmd, err))
+		}
+	}
+
+	if err := exec.Command("uci", "commit", "network").Run(); err != nil {
+		return errors.Join(InvalidConfigError, fmt.Errorf("failed to commit changes: %v", err))
+	}
+
+	if err := exec.Command("/etc/init.d/network", "restart").Run(); err != nil {
+		return errors.Join(InvalidConfigError, fmt.Errorf("failed to restart network: %v", err))
+	}
+
 	return nil
 }
 
-// SetMACAddress MAC 주소 설정 (XX:XX:XX:XX:XX:XX 형식)
-func (i *InternetConfig) SetMACAddress(mac string) error {
-	parts := strings.Split(strings.ToUpper(mac), ":")
-	if len(parts) != 6 {
-		return fmt.Errorf("invalid MAC address format")
+func getUCIValue(path string) (string, error) {
+	cmd := exec.Command("uci", "get", path)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get UCI value for %s: %v", path, err)
 	}
-	i.MACAddr = mac
-	i.CloneMAC = true
-	return nil
+	return strings.TrimSpace(string(output)), nil
 }
 
-// SetDNSServers DNS 서버 목록 설정
-func (i *InternetConfig) SetDNSServers(servers []string) {
-	i.DNS = servers
+func checkValidIP(ip string) error {
+	parsedIP := net.ParseIP(ip)
+
+	if parsedIP != nil && parsedIP.To4() != nil {
+		return nil
+	}
+
+	return fmt.Errorf("invalid IP: %s", ip)
 }
 
-// EnableDynamicIP DynamicIP 설정으로 변경
-func (i *InternetConfig) EnableDynamicIP() {
-	i.Proto = DynamicIP
-	i.IpAddr = ""
-	i.Gateway = ""
-}
+func checkValidMAC(mac string) error {
+	parsedMAC, err := net.ParseMAC(mac)
 
-// EnableStaticIP 고정 IP 설정으로 변경
-func (i *InternetConfig) EnableStaticIP() {
-	i.Proto = StaticIP
+	if err != nil {
+		return nil
+	}
+
+	if len(parsedMAC) == 6 {
+		return nil
+	}
+
+	return fmt.Errorf("invalid MAC: %s", mac)
 }

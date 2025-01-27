@@ -1,22 +1,16 @@
 package config
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"os/exec"
 	"strings"
 )
 
-const IntranetConfigPath string = "/etc/config/custom_network/intranet"
-
-// IntranetConfig OpenWrt 내부 네트워크 연결 설정을 위한 구조체
 type IntranetConfig struct {
-	// IP 설정
-	IpAddr  string // xxx.xxx.xxx.xxx 형식
-	Netmask string // xxx.xxx.xxx.xxx 형식
+	IpAddr  string
+	Netmask string
 }
 
-// NewIntranetConfig 기본값으로 초기화된 내부 네트워크 설정 구조체 생성
 func NewIntranetConfig() *IntranetConfig {
 	return &IntranetConfig{
 		IpAddr:  "192.168.0.1",
@@ -24,81 +18,46 @@ func NewIntranetConfig() *IntranetConfig {
 	}
 }
 
-// SaveIntranetConfig OpenWrt UCI 형식으로 설정을 파일에 저장
 func (i *IntranetConfig) SaveIntranetConfig() error {
-	f, err := os.Create(IntranetConfigPath)
-	if err != nil {
-		return fmt.Errorf("failed to create config file: %v", err)
-	}
-	defer f.Close()
-
-	writer := bufio.NewWriter(f)
-
-	// 기본 인터페이스 설정
-	_, err = writer.WriteString("config interface 'lan'\n\toption device 'br-lan'\n\toption proto 'static'\n")
-	if err != nil {
-		return err
+	// UCI 설정을 위한 명령어들
+	commands := [][]string{
+		{"uci", "set", "network.lan.device=br-lan"},
+		{"uci", "set", "network.lan.proto=static"},
+		{"uci", "set", fmt.Sprintf("network.lan.ipaddr=%s", i.IpAddr)},
+		{"uci", "set", fmt.Sprintf("network.lan.netmask=%s", i.Netmask)},
+		{"uci", "commit", "network"},
 	}
 
-	// IP 주소 설정
-	if i.IpAddr != "" {
-		_, err = writer.WriteString(fmt.Sprintf("\toption ipaddr '%s'\n", i.IpAddr))
-		if err != nil {
-			return err
+	// 각 명령어 실행
+	for _, cmd := range commands {
+		if err := exec.Command(cmd[0], cmd[1:]...).Run(); err != nil {
+			return fmt.Errorf("failed to execute UCI command %v: %v", cmd, err)
 		}
 	}
 
-	// 서브넷 마스크 설정
-	if i.Netmask != "" {
-		_, err = writer.WriteString(fmt.Sprintf("\toption netmask '%s'\n", i.Netmask))
-		if err != nil {
-			return err
-		}
-	}
-
-	return writer.Flush()
+	return nil
 }
 
-// LoadIntranetConfig OpenWrt UCI 형식의 설정 파일에서 설정 읽기
 func LoadIntranetConfig() (*IntranetConfig, error) {
-	f, err := os.Open(IntranetConfigPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open config file: %v", err)
-	}
-	defer f.Close()
-
 	config := NewIntranetConfig()
-	scanner := bufio.NewScanner(f)
 
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		// option 라인 파싱
-		if strings.HasPrefix(line, "option") {
-			parts := strings.Fields(line)
-			if len(parts) < 3 {
-				continue
-			}
-
-			// 따옴표 제거
-			value := strings.Trim(strings.Join(parts[2:], " "), "'")
-
-			switch parts[1] {
-			case "ipaddr":
-				config.IpAddr = value
-			case "netmask":
-				config.Netmask = value
-			}
-		}
+	// IP 주소 가져오기
+	ipCmd := exec.Command("uci", "get", "network.lan.ipaddr")
+	ipOut, err := ipCmd.Output()
+	if err == nil {
+		config.IpAddr = strings.TrimSpace(string(ipOut))
 	}
 
-	return config, scanner.Err()
+	// 넷마스크 가져오기
+	netmaskCmd := exec.Command("uci", "get", "network.lan.netmask")
+	netmaskOut, err := netmaskCmd.Output()
+	if err == nil {
+		config.Netmask = strings.TrimSpace(string(netmaskOut))
+	}
+
+	return config, nil
 }
 
-// SetIPAddress IP 주소 설정 (xxx.xxx.xxx.xxx 형식)
 func (i *IntranetConfig) SetIPAddress(ip string) error {
 	parts := strings.Split(ip, ".")
 	if len(parts) != 4 {
@@ -108,7 +67,6 @@ func (i *IntranetConfig) SetIPAddress(ip string) error {
 	return nil
 }
 
-// SetNetmask 서브넷 마스크 설정 (xxx.xxx.xxx.xxx 형식)
 func (i *IntranetConfig) SetNetmask(netmask string) error {
 	parts := strings.Split(netmask, ".")
 	if len(parts) != 4 {
