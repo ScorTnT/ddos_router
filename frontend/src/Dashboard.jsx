@@ -40,6 +40,7 @@ import { getRouterInfo } from './api/getRouterInfo';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
+import BlackList from './BlackList.jsx';
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -91,15 +92,17 @@ function Dashboard({ setIsLoggedIn }) {
                     <Tab icon={<SpeedIcon />} label="정보" />
                     <Tab icon={<SettingsIcon />} label="네트워크 기본 설정" />
                     <Tab icon={<SettingsIcon />} label="내부 네트워크 설정" />
+                    <Tab icon={<SettingsIcon />} label="제한 목록" />
                     <Tab icon={<SettingsIcon />} label="관리자 설정" />
                 </Tabs>
             </AppBar>
 
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: 4 }}>
                 {currentTab === 0 && <InfoPanel />}
                 {currentTab === 1 && <NetworkConfig />}
                 {currentTab === 2 && <IntranetConfig />}
-                {currentTab === 3 && <UserConfig />}
+                {currentTab === 3 && <BlackList />}
+                {currentTab === 4 && <UserConfig />}
             </Box>
         </Box>
     );
@@ -123,8 +126,6 @@ function InfoPanel() {
                 setUpdateError(null);
             }
 
-            //setConnectionLog(connectionsData || '로그 정보 없음');
-            // 연결 로그 업데이트
             if (Array.isArray(connectionsData)) setConnectionLog(connectionsData);
             else setConnectionLog([]);
         
@@ -169,42 +170,6 @@ function InfoPanel() {
                     </IconButton>
                 </Tooltip>
             </Box>
-
-            {/* <Card>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                        패킷 통신 로그
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={10}
-                        variant="outlined"
-                        value={updateError || connectionLog}
-                        InputProps={{
-                            readOnly: true,
-                            style: {
-                                fontFamily: 'monospace',
-                                fontSize: '0.875rem',
-                            },
-                        }}
-                        error={!!updateError}
-                        sx={{
-                            backgroundColor: 'background.paper',
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: updateError ? 'error.main' : 'rgba(0, 0, 0, 0.23)',
-                                },
-                            },
-                        }}
-                    />
-                    {updateError && (
-                        <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                            {updateError}
-                        </Typography>
-                    )}
-                </CardContent>
-            </Card> */}
 
             <Card>
                 <CardContent>
