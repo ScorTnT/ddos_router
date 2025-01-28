@@ -5,12 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b1b779df-94c2-44b5-a331-9da27552d852" name="Changes" comment="[백엔드] 인트라넷, 인터넷 설정 uci로 동작하게 적용">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/uci_utils.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2024-11-03__12_21__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2024-11-03_오후_12_21_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/builds/backend" beforeDir="false" afterPath="$PROJECT_DIR$/builds/backend" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/internet.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/internet.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/intranet.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/intranet.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/controller/internet.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/internet.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controller/intranet.go" beforeDir="false" afterPath="$PROJECT_DIR$/controller/intranet.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

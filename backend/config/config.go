@@ -1,8 +1,19 @@
 package config
 
 import (
+	"errors"
 	"gopkg.in/yaml.v3"
 	"os"
+)
+
+const (
+	WanInterfaceName = "wan"
+	LanInterfaceName = "lan"
+)
+
+var (
+	InvalidConfigError = errors.New("invalid config data")
+	LoadConfigError    = errors.New("failed to load config")
 )
 
 type Config struct {

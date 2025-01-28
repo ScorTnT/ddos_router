@@ -1,38 +1,64 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
 )
 
 type IntranetConfig struct {
-	IpAddr  string
-	Netmask string
+	IPAddress string
+	Netmask   string
 }
 
 func NewIntranetConfig() *IntranetConfig {
 	return &IntranetConfig{
-		IpAddr:  "192.168.0.1",
-		Netmask: "255.255.255.0",
+		IPAddress: "192.168.0.1",
+		Netmask:   "255.255.255.0",
 	}
 }
 
-func (i *IntranetConfig) SaveIntranetConfig() error {
-	// UCI 설정을 위한 명령어들
-	commands := [][]string{
-		{"uci", "set", "network.lan.device=br-lan"},
-		{"uci", "set", "network.lan.proto=static"},
-		{"uci", "set", fmt.Sprintf("network.lan.ipaddr=%s", i.IpAddr)},
-		{"uci", "set", fmt.Sprintf("network.lan.netmask=%s", i.Netmask)},
-		{"uci", "commit", "network"},
+func ApplyIntranetConfig(config *IntranetConfig) error {
+	var applyCommands []string
+
+	if config.IPAddress != "" {
+		err := checkValidIP(config.IPAddress)
+
+		if err != nil {
+			return errors.Join(InvalidConfigError, err)
+		}
+
+		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.ipaddr=%s", LanInterfaceName, config.IPAddress))
+	} else {
+		return errors.Join(InvalidConfigError, fmt.Errorf("ip address value is required"))
 	}
 
-	// 각 명령어 실행
-	for _, cmd := range commands {
-		if err := exec.Command(cmd[0], cmd[1:]...).Run(); err != nil {
-			return fmt.Errorf("failed to execute UCI command %v: %v", cmd, err)
+	if config.Netmask != "" {
+		err := checkValidIP(config.Netmask)
+
+		if err != nil {
+			return errors.Join(InvalidConfigError, err)
 		}
+
+		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.netmask=%s", LanInterfaceName, config.Netmask))
+	} else {
+		return errors.Join(InvalidConfigError, fmt.Errorf("netmask value is required"))
+	}
+
+	for _, command := range applyCommands {
+		cmd := exec.Command("uci", strings.Split(command, " ")...)
+		if err := cmd.Run(); err != nil {
+			return errors.Join(InvalidConfigError, fmt.Errorf("failed to run uci command, %s: %v", cmd, err))
+		}
+	}
+
+	if err := exec.Command("uci", "commit", "network").Run(); err != nil {
+		return errors.Join(InvalidConfigError, fmt.Errorf("failed to commit changes: %v", err))
+	}
+
+	if err := exec.Command("/etc/init.d/network", "restart").Run(); err != nil {
+		return errors.Join(InvalidConfigError, fmt.Errorf("failed to restart network: %v", err))
 	}
 
 	return nil
@@ -42,36 +68,16 @@ func LoadIntranetConfig() (*IntranetConfig, error) {
 	config := NewIntranetConfig()
 
 	// IP 주소 가져오기
-	ipCmd := exec.Command("uci", "get", "network.lan.ipaddr")
-	ipOut, err := ipCmd.Output()
+	ipAddress, err := getUCIValue(fmt.Sprintf("network.%s.ipaddr", LanInterfaceName))
 	if err == nil {
-		config.IpAddr = strings.TrimSpace(string(ipOut))
+		config.IPAddress = ipAddress
 	}
 
 	// 넷마스크 가져오기
-	netmaskCmd := exec.Command("uci", "get", "network.lan.netmask")
-	netmaskOut, err := netmaskCmd.Output()
+	netmask, err := getUCIValue(fmt.Sprintf("network.%s.netmask", LanInterfaceName))
 	if err == nil {
-		config.Netmask = strings.TrimSpace(string(netmaskOut))
+		config.Netmask = netmask
 	}
 
 	return config, nil
-}
-
-func (i *IntranetConfig) SetIPAddress(ip string) error {
-	parts := strings.Split(ip, ".")
-	if len(parts) != 4 {
-		return fmt.Errorf("invalid IP address format")
-	}
-	i.IpAddr = ip
-	return nil
-}
-
-func (i *IntranetConfig) SetNetmask(netmask string) error {
-	parts := strings.Split(netmask, ".")
-	if len(parts) != 4 {
-		return fmt.Errorf("invalid netmask format")
-	}
-	i.Netmask = netmask
-	return nil
 }
