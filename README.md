@@ -11,6 +11,6 @@ cd ~/frontend
 npm install
 npm run dev
 ```
-# listening port
+# listen port
 backend : 2024<br>
 frontend : 5173 <br>
