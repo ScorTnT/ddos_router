@@ -6,7 +6,7 @@ import (
 )
 
 func GetIntranetConfig(c *fiber.Ctx) error {
-	intranetConfig, err := config.LoadInternetConfig()
+	intranetConfig, err := config.LoadIntranetConfig()
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

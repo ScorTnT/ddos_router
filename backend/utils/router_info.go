@@ -18,30 +18,30 @@ type RouterInfo struct {
 }
 
 func GetRouterInfo() ([]RouterInfo, error) {
-    var routerInfo []RouterInfo
+	var routerInfo []RouterInfo
 
-    // 네트워크 인터페이스 이름 동적 탐색
-    interfaceName := ""
-    interfaces, err := net.Interfaces()
-    if err != nil {
-        interfaceName = "Unknown"
-    } else {
-        for _, iface := range interfaces {
-            if strings.Contains(iface.Name, "eth") { // "eth"가 포함된 이름 검색
-                interfaceName = iface.Name
-                break
-            }
-        }
-        if interfaceName == "" {
-            interfaceName = "Unknown"
-        }
-    }
+	// 네트워크 인터페이스 이름 동적 탐색
+	interfaceName := ""
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		interfaceName = "Unknown"
+	} else {
+		for _, iface := range interfaces {
+			if strings.Contains(iface.Name, "eth") { // "eth"가 포함된 이름 검색
+				interfaceName = iface.Name
+				break
+			}
+		}
+		if interfaceName == "" {
+			interfaceName = "Unknown"
+		}
+	}
 
-    // MAC 주소
-    mac, err := getMACAddress(interfaceName)
-    if err != nil || interfaceName == "Unknown" {
-        mac = "Unknown"
-    }
+	// MAC 주소
+	mac, err := getMACAddress(interfaceName)
+	if err != nil || interfaceName == "Unknown" {
+		mac = "Unknown"
+	}
 	routerInfo = append(routerInfo, RouterInfo{Name: "MAC 주소", Value: mac})
 
 	model, err := getModelName()
@@ -91,29 +91,29 @@ func GetRouterInfo() ([]RouterInfo, error) {
 }
 
 func getMACAddress(interfaceName string) (string, error) {
-    // 인터페이스 이름이 제공되지 않으면 동적으로 탐색
-    if interfaceName == "" {
-        interfaces, err := net.Interfaces()
-        if err != nil {
-            return "", err
-        }
+	// 인터페이스 이름이 제공되지 않으면 동적으로 탐색
+	if interfaceName == "" {
+		interfaces, err := net.Interfaces()
+		if err != nil {
+			return "", err
+		}
 
-        for _, iface := range interfaces {
-            if strings.Contains(iface.Name, "eth") { // "eth"가 포함된 이름 검색
-                return iface.HardwareAddr.String(), nil
-            }
-        }
-        return "Unknown", nil // 적합한 인터페이스를 찾지 못한 경우
-    }
+		for _, iface := range interfaces {
+			if strings.Contains(iface.Name, "eth") { // "eth"가 포함된 이름 검색
+				return iface.HardwareAddr.String(), nil
+			}
+		}
 
-    // 기존 로직
-    iface, err := net.InterfaceByName(interfaceName)
-    if err != nil {
-        return "", err
-    }
-    return iface.HardwareAddr.String(), nil
+		return "Unknown", nil // 적합한 인터페이스를 찾지 못한 경우
+	}
+
+	// 기존 로직
+	iface, err := net.InterfaceByName(interfaceName)
+	if err != nil {
+		return "", err
+	}
+	return iface.HardwareAddr.String(), nil
 }
-
 
 func getModelName() (string, error) {
 	data, err := os.ReadFile("/proc/device-tree/model")
@@ -265,89 +265,88 @@ func getConnectedDevices() (int, error) {
 }
 
 func getDownloadUploadSpeed() (string, string, error) {
-    interfaceName := ""
-    interfaces, err := net.Interfaces()
-    if err != nil {
-        return "", "", err
-    }
+	interfaceName := ""
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", "", err
+	}
 
-    for _, iface := range interfaces {
-        if strings.Contains(iface.Name, "eth") {
-            interfaceName = iface.Name
-            break
-        }
-    }
+	for _, iface := range interfaces {
+		if strings.Contains(iface.Name, "eth") {
+			interfaceName = iface.Name
+			break
+		}
+	}
 
-    if interfaceName == "" {
-        return "Unknown", "Unknown", fmt.Errorf("no matching network interface found")
-    }
+	if interfaceName == "" {
+		return "Unknown", "Unknown", fmt.Errorf("no matching network interface found")
+	}
 
-    rx1, tx1, err := getNetworkStats(interfaceName)
-    if err != nil {
-        return "", "", err
-    }
+	rx1, tx1, err := getNetworkStats(interfaceName)
+	if err != nil {
+		return "", "", err
+	}
 
-    time.Sleep(time.Second)
+	time.Sleep(time.Second)
 
-    rx2, tx2, err := getNetworkStats(interfaceName)
-    if err != nil {
-        return "", "", err
-    }
+	rx2, tx2, err := getNetworkStats(interfaceName)
+	if err != nil {
+		return "", "", err
+	}
 
-    downloadSpeed := float64(rx2-rx1) * 8 / 1000000 // bytes to Mbps
-    uploadSpeed := float64(tx2-tx1) * 8 / 1000000   // bytes to Mbps
+	downloadSpeed := float64(rx2-rx1) * 8 / 1000000 // bytes to Mbps
+	uploadSpeed := float64(tx2-tx1) * 8 / 1000000   // bytes to Mbps
 
-    return fmt.Sprintf("%.1f", downloadSpeed), fmt.Sprintf("%.1f", uploadSpeed), nil
+	return fmt.Sprintf("%.1f", downloadSpeed), fmt.Sprintf("%.1f", uploadSpeed), nil
 }
 
-
 func getNetworkStats(interfaceName string) (uint64, uint64, error) {
-    // 인터페이스 이름이 제공되지 않으면 동적으로 탐색
-    if interfaceName == "" {
-        interfaces, err := net.Interfaces()
-        if err != nil {
-            return 0, 0, err
-        }
+	// 인터페이스 이름이 제공되지 않으면 동적으로 탐색
+	if interfaceName == "" {
+		interfaces, err := net.Interfaces()
+		if err != nil {
+			return 0, 0, err
+		}
 
-        for _, iface := range interfaces {
-            if strings.Contains(iface.Name, "eth") {
-                interfaceName = iface.Name
-                break
-            }
-        }
+		for _, iface := range interfaces {
+			if strings.Contains(iface.Name, "eth") {
+				interfaceName = iface.Name
+				break
+			}
+		}
 
-        if interfaceName == "" {
-            return 0, 0, fmt.Errorf("no matching network interface found")
-        }
-    }
+		if interfaceName == "" {
+			return 0, 0, fmt.Errorf("no matching network interface found")
+		}
+	}
 
-    data, err := os.ReadFile("/proc/net/dev")
-    if err != nil {
-        return 0, 0, err
-    }
+	data, err := os.ReadFile("/proc/net/dev")
+	if err != nil {
+		return 0, 0, err
+	}
 
-    scanner := bufio.NewScanner(strings.NewReader(string(data)))
-    for scanner.Scan() {
-        line := scanner.Text()
-        if strings.Contains(line, interfaceName) {
-            fields := strings.Fields(line)
-            if len(fields) < 10 {
-                return 0, 0, fmt.Errorf("invalid format in /proc/net/dev")
-            }
+	scanner := bufio.NewScanner(strings.NewReader(string(data)))
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, interfaceName) {
+			fields := strings.Fields(line)
+			if len(fields) < 10 {
+				return 0, 0, fmt.Errorf("invalid format in /proc/net/dev")
+			}
 
-            rx, err := strconv.ParseUint(fields[1], 10, 64)
-            if err != nil {
-                return 0, 0, err
-            }
+			rx, err := strconv.ParseUint(fields[1], 10, 64)
+			if err != nil {
+				return 0, 0, err
+			}
 
-            tx, err := strconv.ParseUint(fields[9], 10, 64)
-            if err != nil {
-                return 0, 0, err
-            }
+			tx, err := strconv.ParseUint(fields[9], 10, 64)
+			if err != nil {
+				return 0, 0, err
+			}
 
-            return rx, tx, nil
-        }
-    }
+			return rx, tx, nil
+		}
+	}
 
-    return 0, 0, fmt.Errorf("interface %s not found", interfaceName)
+	return 0, 0, fmt.Errorf("interface %s not found", interfaceName)
 }
