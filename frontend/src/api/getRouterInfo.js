@@ -1,7 +1,6 @@
 export async function getRouterInfo() {
     try {
         const response = await fetch(`http://${window.location.hostname}:2024/router_info`);
-        // const response = await fetch('http://greatmandu.asuscomm.com:2024/router_info');
         if (!response.ok) {
             throw new Error('Failed to fetch router information');
         }
