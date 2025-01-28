@@ -1,8 +1,10 @@
 # OpenWrt 베이스 이미지
 FROM openwrt/rootfs:x86-64-23.05.5
 
-# /var/lock 디렉토리 생성 후 OpenWrt 패키지 업데이트 및 Git 설치
-RUN mkdir -p /var/lock && opkg update && opkg install git git-http node curl nano python3-pip bash dos2unix
+# /var/lock 디렉토리 생성 후 OpenWrt 패키지 업데이트 및 필요한 패키지 설치
+RUN mkdir -p /var/lock && \
+    opkg update && \
+    opkg install git git-http node curl nano python3-pip bash conntrack
 
 # supervisor 설치
 RUN pip3 install supervisor
@@ -20,19 +22,11 @@ RUN git clone https://github.com/ScorTnT/ddos_router
 WORKDIR /root/ddos_router/frontend
 RUN npm install
 
-# backend 디렉토리 이동
+# backend 디렉토리로 이동 및 빌드
 WORKDIR /root/ddos_router/backend
+RUN chmod +x build && bash build
 
-# build 파일에 실행 권한 부여
-RUN chmod +x build
-
-# Windows 스타일 줄바꿈 형식 변환
-RUN dos2unix build
-
-# build 실행 파일 생성 (bash 사용)
-RUN ls -l && bash build
-
-# backend 실행파일에 실행 권한 부여
+# backend 실행 파일에 실행 권한 부여
 WORKDIR /root/ddos_router/backend/builds/
 RUN chmod +x backend
 
