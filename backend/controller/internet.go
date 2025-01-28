@@ -18,7 +18,7 @@ func GetInternetConfig(c *fiber.Ctx) error {
 }
 
 func SetInternetConfig(c *fiber.Ctx) error {
-	internetConfig := config.InternetConfig{}
+	internetConfig := config.NewInternetConfig()
 
 	if err := c.BodyParser(internetConfig); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -26,7 +26,7 @@ func SetInternetConfig(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := config.ApplyInternetConfig(&internetConfig); err != nil {
+	if err := config.ApplyInternetConfig(internetConfig); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
