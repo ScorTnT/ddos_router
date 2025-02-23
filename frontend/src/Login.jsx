@@ -40,7 +40,8 @@ const Login = ({setIsLoggedIn}) => {
 
         try {
             const loginSuccess = await attemptLogin(formData.username, formData.password); // 이 둘을 절대 조심
-            console.Alert(loginSuccess);
+            //console.Alert(loginSuccess);
+            console.log(loginSuccess);
             //const loginSuccess = true;                                                       // 위는 실제 서버에서 로그인 확인, 아래는 무조건 통과
             if (loginSuccess) {
                 setIsLoggedIn(true);

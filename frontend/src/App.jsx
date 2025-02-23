@@ -11,14 +11,25 @@ function App() {
             <Routes>
                 <Route
                     path="/"
-                    element={isLoggedIn ? <Navigate to="/dashboard"/> : <Navigate to="/login"/>}
+                    element={
+                        isLoggedIn ? 
+                            <Navigate to="/dashboard"/> : 
+                            <Navigate to="/login"/>
+                    }
                 />
-                <Route path="/api" element={<APIGuide />} />
+                <Route 
+                    path="/api" 
+                    element={
+                        isLoggedIn ? 
+                            <APIGuide /> :
+                            <Navigate to="/login"/> 
+                            }
+                />
                 <Route
                     path="/login"
                     element={
                         isLoggedIn ?
-                        <Navigate to="/dashboard"/> :
+                            <Navigate to="/dashboard"/> :
                             <Login setIsLoggedIn={setIsLoggedIn}/>
                     }
                 />
