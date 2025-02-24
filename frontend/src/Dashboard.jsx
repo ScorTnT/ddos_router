@@ -43,6 +43,7 @@ import UserConfig from './UserConfig.jsx';
 import BlackList from './BlackList.jsx';
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
+    const [selectedIP, setSelectedIP] = useState(null);
 
     const handleTabChange = (event, newValue) => {
         setCurrentTab(newValue);
@@ -50,6 +51,10 @@ function Dashboard({ setIsLoggedIn }) {
 
     const handleLogout = () => {
         setIsLoggedIn(false);
+    };
+
+    const handleSelectedIP = (ip) => {
+        setSelectedIP(ip);
     };
 
     return (
@@ -99,6 +104,7 @@ function Dashboard({ setIsLoggedIn }) {
 
             <Box sx={{ p: 4 }}>
                 {currentTab === 0 && <InfoPanel />}
+                //{currentTab === 0 && <InfoPanel selectedIP={selectedIP} setSelectedIP={setSelectedIP} />}
                 {currentTab === 1 && <NetworkConfig />}
                 {currentTab === 2 && <IntranetConfig />}
                 {currentTab === 3 && <BlackList />}
@@ -150,6 +156,10 @@ function InfoPanel() {
             }
         };
     }, [isAutoUpdate]);
+
+    const filterIP = selectedIP ?
+        connectionLog.filter(log => log.source_ip === selectedIP || log.dest_ip === selectedIP)
+        : connectionLog;
 
     return (
         <Stack spacing={3}>

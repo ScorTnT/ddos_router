@@ -7,12 +7,8 @@ function APIGuide(){
         </>
 }
 
-// APIGuide.propTypes = {
-//     setIsLoggedIn: PropTypes.func.isRequired
-// }
-
 APIGuide.propTypes = {
-    setIsLoggedIn: PropTypes.func,
-};
+    setIsLoggedIn: PropTypes.func.isRequired
+}
 
 export default APIGuide;

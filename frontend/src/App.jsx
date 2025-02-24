@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom
 import Login from './Login.jsx';
 import Dashboard from './Dashboard.jsx';
 import APIGuide from './APIGuide.jsx';
+
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -21,9 +22,9 @@ function App() {
                     path="/api" 
                     element={
                         isLoggedIn ? 
-                            <APIGuide /> :
+                            <APIGuide setIsLoggedIn={setIsLoggedIn} /> :
                             <Navigate to="/login"/> 
-                            }
+                    }
                 />
                 <Route
                     path="/login"
