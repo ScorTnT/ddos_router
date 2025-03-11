@@ -1,4 +1,3 @@
-config:
-    initial_admin:
+initial_admin:
       username: admin
       password: admin
