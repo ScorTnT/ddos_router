@@ -1,0 +1,79 @@
+Index: Dockerfile
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Build stage\r\nFROM golang:1.23-alpine AS builder\r\n\r\n# Install required packages\r\nRUN apk add --no-cache \\\r\n    gcc \\\r\n    musl-dev \\\r\n    git \\\r\n    make \\\r\n    sqlite-dev\r\n\r\n# Set up Go environment for cross-compilation\r\nENV GOARCH=arm64\r\nENV GOOS=linux\r\nENV CGO_ENABLED=1\r\nENV CC=aarch64-linux-musl-gcc\r\n\r\n# Install aarch64 cross-compiler for SQLite\r\nRUN wget https://musl.cc/aarch64-linux-musl-cross.tgz \\\r\n    && tar -xzf aarch64-linux-musl-cross.tgz \\\r\n    && rm aarch64-linux-musl-cross.tgz \\\r\n    && mv aarch64-linux-musl-cross /opt/cross\r\n\r\n# Set up the PATH to include the cross-compiler\r\nENV PATH=\"/opt/cross/bin:${PATH}\"\r\n\r\n# Set the working directory in the container\r\nWORKDIR /app\r\n\r\n# Copy the Go modules manifests\r\nCOPY go.mod go.sum ./\r\n\r\n# Download dependencies\r\nRUN go mod download\r\n\r\n# Copy the source code\r\nCOPY . .\r\n\r\n# Build the application\r\nRUN CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-musl-gcc \\\r\n    go build -ldflags=\"-linkmode external -extldflags '-static'\" -o /app/backend\r\n\r\n# Final stage\r\nFROM scratch\r\n\r\n# Copy the binary from the build stage\r\nCOPY --from=builder /app/backend /backend\r\n\r\n# Set the entrypoint\r\nENTRYPOINT [\"/backend\"]
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Dockerfile b/Dockerfile
+--- a/Dockerfile	(revision 9636dbc0c289b5c7e3e1e12957e42cd207f4f094)
++++ b/Dockerfile	(date 1732065646749)
+@@ -7,24 +7,51 @@
+     musl-dev \
+     git \
+     make \
+-    sqlite-dev
++    sqlite-dev \
++    libpcap-dev \
++    linux-headers \
++    build-base \
++    flex \
++    bison \
++    autoconf \
++    automake \
++    libtool
+ 
+ # Set up Go environment for cross-compilation
+ ENV GOARCH=arm64
+ ENV GOOS=linux
+ ENV CGO_ENABLED=1
+-ENV CC=aarch64-linux-musl-gcc
+ 
+-# Install aarch64 cross-compiler for SQLite
+-RUN wget https://musl.cc/aarch64-linux-musl-cross.tgz \
+-    && tar -xzf aarch64-linux-musl-cross.tgz \
+-    && rm aarch64-linux-musl-cross.tgz \
++# Install cross-compiler
++RUN wget -q https://musl.cc/aarch64-linux-musl-cross.tgz \
++    && tar -xf aarch64-linux-musl-cross.tgz \
+     && mv aarch64-linux-musl-cross /opt/cross
+ 
+-# Set up the PATH to include the cross-compiler
++# Set environment variables for cross-compilation
+ ENV PATH="/opt/cross/bin:${PATH}"
++ENV CC="/opt/cross/bin/aarch64-linux-musl-gcc"
++ENV CXX="/opt/cross/bin/aarch64-linux-musl-g++"
++ENV PKG_CONFIG_PATH="/opt/cross/aarch64-linux-musl/lib/pkgconfig"
++ENV CROSS_COMPILE="aarch64-linux-musl-"
+ 
+-# Set the working directory in the container
++# Build and install libpcap for arm64
++RUN wget https://www.tcpdump.org/release/libpcap-1.10.4.tar.gz \
++    && tar -xzf libpcap-1.10.4.tar.gz \
++    && cd libpcap-1.10.4 \
++    && ac_cv_linux_vers=5 \
++    CC=${CC} \
++    CFLAGS="-Os -fPIC" \
++    LDFLAGS="-static" \
++    ./configure --host=aarch64-linux-musl \
++    --prefix=/opt/cross/aarch64-linux-musl \
++    --enable-static \
++    --disable-shared \
++    && make \
++    && make install \
++    && cd .. \
++    && rm -rf libpcap-1.10.4*
++
++# Set the working directory
+ WORKDIR /app
+ 
+ # Copy the Go modules manifests
+@@ -37,7 +64,7 @@
+ COPY . .
+ 
+ # Build the application
+-RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-musl-gcc \
++RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm64 \
+     go build -ldflags="-linkmode external -extldflags '-static'" -o /app/backend
+ 
+ # Final stage

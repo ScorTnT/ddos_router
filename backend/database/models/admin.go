@@ -1,8 +1,6 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
 type Admin struct {
 	ID             uint       `gorm:"primaryKey"`
