@@ -20,6 +20,10 @@ func NewLANConfig() *LANConfig {
 }
 
 func (l *LANConfig) SaveConfig(interfaceName string) error {
+	if err := validateLANConfig(l); err != nil {
+		return err
+	}
+
 	var applyCommands []string
 
 	applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.ipaddr=%s", interfaceName, l.IPAddress))
