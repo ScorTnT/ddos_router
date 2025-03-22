@@ -43,7 +43,6 @@ import UserConfig from './UserConfig.jsx';
 import BlackList from './BlackList.jsx';
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
-    const [selectedIP, setSelectedIP] = useState(null);
 
     const handleTabChange = (event, newValue) => {
         setCurrentTab(newValue);
@@ -51,10 +50,6 @@ function Dashboard({ setIsLoggedIn }) {
 
     const handleLogout = () => {
         setIsLoggedIn(false);
-    };
-
-    const handleSelectedIP = (ip) => {
-        setSelectedIP(ip);
     };
 
     return (
@@ -104,7 +99,6 @@ function Dashboard({ setIsLoggedIn }) {
 
             <Box sx={{ p: 4 }}>
                 {currentTab === 0 && <InfoPanel />}
-                {currentTab === 0 && <InfoPanel selectedIP={selectedIP} setSelectedIP={setSelectedIP} />}
                 {currentTab === 1 && <NetworkConfig />}
                 {currentTab === 2 && <IntranetConfig />}
                 {currentTab === 3 && <BlackList />}
@@ -156,10 +150,6 @@ function InfoPanel() {
             }
         };
     }, [isAutoUpdate]);
-
-    const filterIP = selectedIP ?
-        connectionLog.filter(log => log.source_ip === selectedIP || log.dest_ip === selectedIP)
-        : connectionLog;
 
     return (
         <Stack spacing={3}>
@@ -240,34 +230,6 @@ function InfoPanel() {
                 </CardContent>
             </Card>
         
-            {selectedIP && (
-                <Card>
-                    <cardContent>
-                        <Typography variant="h6" gutterBottom>
-                            선택된 IP : {selectedIP}의 연결 목록
-                        </Typography>
-                        <TableContainer component={Paper}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>도착 IP</TableCell>
-                                        <TableCell>도착 포트</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {filterIP.map((log, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{log.dest_ip}</TableCell>
-                                            <TableCell>{log.dest_port}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </cardContent>
-                </Card>
-            )
-            }
             <Card>
                 <CardContent>
                     <Typography variant="h6" gutterBottom>
