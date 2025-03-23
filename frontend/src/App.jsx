@@ -16,7 +16,7 @@ function App() {
     <HashRouter>
       <Routes>
         <Route
-          path="/"
+          index
           element={
             isLoggedIn ? (
               <Navigate to="/dashboard" replace />
