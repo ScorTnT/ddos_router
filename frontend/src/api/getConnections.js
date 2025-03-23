@@ -7,7 +7,6 @@ export async function getConnections() {
         }
         
         const connections = await response.json();
-        console.log(connections);
 
         return connections;
     } catch (error) {
