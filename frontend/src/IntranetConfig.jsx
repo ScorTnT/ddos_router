@@ -12,7 +12,6 @@ import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
 function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("192.168.0.1");
     const [subnetMask, setSubnetMask] = useState("255.255.255.0");
-    const [dhcp, setDhcp] = useState("");
     return (
         <Card>
             <CardContent>

@@ -120,7 +120,6 @@ function InfoPanel() {
                 getRouterInfo(),
                 getConnections()
             ]);
-            console.log(routerData);
             if (routerData) {
                 setRouterInfo(routerData);
                 setUpdateError(null);
