@@ -1,6 +1,8 @@
+const API_URL = import.meta.env.VITE_API_URL
+
 export async function LoadInternetConfig() {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/internet`);
+        const response = await fetch(`${API_URL}/internet`);
 
         if (response.ok) {
             return await response.json();
@@ -15,7 +17,7 @@ export async function LoadInternetConfig() {
 
 export async function SaveInternetConfig(intranetConfig) {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/internet`, {
+        const response = await fetch(`${API_URL}/internet`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

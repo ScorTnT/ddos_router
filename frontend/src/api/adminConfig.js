@@ -1,6 +1,8 @@
+const API_URL = import.meta.env.VITE_API_URL
+
 export async function adminConfig() {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/user`);
+        const response = await fetch(`${API_URL}/user`);
 
         if (response.ok) {
             return await response.json();
@@ -13,7 +15,7 @@ export async function adminConfig() {
     }
 }export async function SaveAdminConfig() {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/user`);
+        const response = await fetch(`${API_URL}/user`);
 
         if (response.ok) {
             return await response.json();

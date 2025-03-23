@@ -1,6 +1,8 @@
+const API_URL = import.meta.env.VITE_API_URL
+
 export async function LoadIntranetConfig() {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/intranet`);
+        const response = await fetch(`${API_URL}/intranet`);
 
         if (response.ok) {
             return await response.json();
@@ -15,7 +17,7 @@ export async function LoadIntranetConfig() {
 
 export async function SaveIntranetConfig(intranetConfig) {
     try {
-        const response = await fetch(`http://${window.location.hostname}:2024/intranet`, {
+        const response = await fetch(`${API_URL}/intranet`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
