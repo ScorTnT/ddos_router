@@ -1,6 +1,6 @@
 import { useState, useef } from "react";
 import {
-  HashRouter as Router,
+  HashRouter,
   Navigate,
   Route,
   Routes,
