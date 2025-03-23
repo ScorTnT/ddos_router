@@ -7,9 +7,6 @@ export async function attemptLogin(username, password) {
             },
             body: new URLSearchParams({ username, password })
         });
-
-        console.log(await response.json());
-
         return (response.status === 200);
     } catch {
         return false;
