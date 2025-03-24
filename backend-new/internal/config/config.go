@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -17,7 +18,41 @@ type Config struct {
 	}
 }
 
-func LoadConfig() (*Config, error) {
+var (
+	instance *Config
+	once     sync.Once
+	mu       sync.RWMutex
+)
+
+func GetConfig() *Config {
+	once.Do(func() {
+		cfg, err := loadConfig()
+		if err != nil {
+			panic(
+				fmt.Errorf("failed to load configuration: %v", err),
+			)
+		}
+		instance = cfg
+	})
+
+	return instance
+}
+
+func ReloadConfig() error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	cfg, err := loadConfig()
+	if err != nil {
+		return err
+	}
+
+	instance = cfg
+
+	return nil
+}
+
+func loadConfig() (*Config, error) {
 	v := viper.New()
 	v.SetConfigName("config")
 	v.SetConfigType("yaml")
