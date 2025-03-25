@@ -37,6 +37,11 @@ function NetworkConfig() {
             setIpAddress(data.ip_addr || "error");
             setSubnetMask(data.netmask || "error");
             setGateway(data.gateway || "error");
+            if (connectionType === "dhcp") {
+                setIpAddress("dhcp 설정 사용중");
+                setSubnetMask("dhcp 설정 사용중");
+                setGateway("dhcp 설정 사용중");
+            }
             setPrimaryDNS(data.dns_list[0] || "error");
             setSecondaryDNS(data.dns_list[1] || "error");
             setWanMacAddress(data.mac_addr || "");
