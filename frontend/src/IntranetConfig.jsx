@@ -52,12 +52,12 @@ function IntranetConfig() {
             </CardContent>
         </Card>
         <Card>
-            <IntranetConfig></IntranetConfig>
+            <IntranetIP></IntranetIP>
         </Card>
         </>
     );
 }
-function IntranetConfig() {
+function IntranetIP() {
     const [intrnetConnection, setIntranetConnection] = useState([]);
 
     const fetchIntranetConfig = async () => {
