@@ -12,8 +12,7 @@ import {
     TableRow,
     TableCell,
     Paper,
-    Typography,
-
+    Typography
 } from "@mui/material";
 import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
 
@@ -21,7 +20,7 @@ function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("192.168.0.1");
     const [subnetMask, setSubnetMask] = useState("255.255.255.0");
     return (
-        <>
+        <Stack spacing={2}>
         <Card>
             <CardContent>
                 <Stack spacing={3}>
@@ -60,18 +59,22 @@ function IntranetConfig() {
             </CardContent>
         </Card>
         <IntranetIP></IntranetIP>
-        </>
+        </Stack>
     );
 }
 function IntranetIP() {
-    const [intrnetConnection, setIntranetConnection] = useState([]);
+    const [intranetConnection, setIntranetConnection] = useState([]);
 
     const fetchIntranetConfig = async () => {
-        const [intranetData] = await Promise.all([
-            LoadIntranetConfig()
-        ]);
-        if(intranetData){
-            setIntranetConnection(intranetData);
+        try {
+
+            const intranetData = await LoadIntranetConfig();
+
+            if(intranetData){
+                setIntranetConnection(intranetData);
+            }
+        } catch (error) {
+            console.error('Error fetching intranet data:', error);
         }
     }
 
@@ -79,31 +82,31 @@ function IntranetIP() {
         fetchIntranetConfig();  
     },[]);
 
-    return <>
-    <Card>
-        <CardContent>
-            <Typography variant="h6" gutterBottom>
-                내부 IP 목록
-            </Typography>
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell sx={{ fontWeight: 'bold' }}>IP</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {intrnetConnection.map((row) => (
-                            <TableRow key={row.IPAddress}>
-                                <TableCell>{row.IPAddress}</TableCell>
+    return (
+        <Card>
+            <CardContent>
+                <Typography variant="h6" gutterBottom>
+                    내부 IP 목록
+                </Typography>
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ fontWeight: 'bold' }}>IP</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </CardContent>
-    </Card>
-</>;
+                        </TableHead>
+                        <TableBody>
+                            {intranetConnection.map((row) => (
+                                <TableRow key={row.mac}>
+                                    <TableCell>{row.ip}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </CardContent>
+        </Card>
+    );
 }
 
 export default IntranetConfig;
