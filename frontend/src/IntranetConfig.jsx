@@ -15,7 +15,7 @@ import {
     Typography
 } from "@mui/material";
 import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
-
+import { getArpInfo } from './api/arpConfig';
 function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("192.168.0.1");
     const [subnetMask, setSubnetMask] = useState("255.255.255.0");
@@ -67,8 +67,7 @@ function IntranetIP() {
 
     const fetchIntranetConfig = async () => {
         try {
-
-            const [intranetData] = await LoadIntranetConfig();
+            const intranetData = await getArpInfo();
 
             if(intranetData){
                 setIntranetConnection(intranetData);
