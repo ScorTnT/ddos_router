@@ -68,7 +68,7 @@ function IntranetIP() {
     const fetchIntranetConfig = async () => {
         try {
 
-            const intranetData = await LoadIntranetConfig();
+            const [intranetData] = await LoadIntranetConfig();
 
             if(intranetData){
                 setIntranetConnection(intranetData);
@@ -97,7 +97,7 @@ function IntranetIP() {
                         </TableHead>
                         <TableBody>
                             {intranetConnection.map((row) => (
-                                <TableRow key={row.mac}>
+                                <TableRow key={row.ip}>
                                     <TableCell>{row.ip}</TableCell>
                                 </TableRow>
                             ))}
