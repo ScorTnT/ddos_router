@@ -94,8 +94,8 @@ function IntranetIP() {
                     </TableHead>
                     <TableBody>
                         {intrnetConnection.map((row) => (
-                            <TableRow key={row.name}>
-                                <TableCell>{row.name}</TableCell>
+                            <TableRow key={row.IPAddress}>
+                                <TableCell>{row.IPAddress}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
