@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Button,
     Card,
@@ -13,6 +13,7 @@ function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("192.168.0.1");
     const [subnetMask, setSubnetMask] = useState("255.255.255.0");
     return (
+        <>
         <Card>
             <CardContent>
                 <Stack spacing={3}>
@@ -50,7 +51,53 @@ function IntranetConfig() {
                 </Stack>
             </CardContent>
         </Card>
+        <Card>
+            <IntranetConfig></IntranetConfig>
+        </Card>
+        </>
     );
+}
+function IntranetConfig() {
+    const [intrnetConnection, setIntranetConnection] = useState([]);
+
+    const fetchIntranetConfig = async () => {
+        const [intranetData] = await Promis.all([
+            LoadIntranetConfig()
+        ]);
+        if(intranetData){
+            setIntranetConnection(intranetData);
+        }
+    }
+
+    useEffect(() => {
+        fetchIntranetConfig();  
+    },[]);
+
+    return <>
+    <Card>
+        <CardContent>
+            <Typography variant="h6" gutterBottom>
+                내부 IP 목록
+            </Typography>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell sx={{ fontWeight: 'bold' }}>IP</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {intrnetConnection.map((row) => (
+                            <TableRow key={row.name}>
+                                <TableCell>{row.name}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </CardContent>
+    </Card>
+</>;
 }
 
 export default IntranetConfig;

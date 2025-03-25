@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import PropTypes from "prop-types";
 
 function BlackList(){
-
+    
+    useEffect(() => {
+    }, []);
     return <>
         black list
         </>
