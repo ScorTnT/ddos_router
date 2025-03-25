@@ -5,7 +5,15 @@ import {
     CardContent,
     TextField,
     Stack,
+    TableContainer,
+    Table,
+    TableHead,
+    TableBody,
+    TableRow,
+    TableCell,
+    Paper,
     Typography,
+
 } from "@mui/material";
 import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
 
@@ -51,9 +59,7 @@ function IntranetConfig() {
                 </Stack>
             </CardContent>
         </Card>
-        <Card>
-            <IntranetIP></IntranetIP>
-        </Card>
+        <IntranetIP></IntranetIP>
         </>
     );
 }
@@ -61,7 +67,7 @@ function IntranetIP() {
     const [intrnetConnection, setIntranetConnection] = useState([]);
 
     const fetchIntranetConfig = async () => {
-        const [intranetData] = await Promis.all([
+        const [intranetData] = await Promise.all([
             LoadIntranetConfig()
         ]);
         if(intranetData){
