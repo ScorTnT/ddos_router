@@ -2,8 +2,9 @@ package config
 
 import (
 	"errors"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -12,8 +13,8 @@ const (
 )
 
 var (
-	InvalidConfigError = errors.New("invalid config data")
-	LoadConfigError    = errors.New("failed to load config")
+	ErrInvalidConfig = errors.New("invalid config data")
+	ErrLoadConfig    = errors.New("failed to load config")
 )
 
 type Config struct {

@@ -40,7 +40,7 @@ func LoadInternetConfig() (*InternetConfig, error) {
 	// Load protocol type
 	proto, err := getUCIValue(fmt.Sprintf("network.%s.proto", WanInterfaceName))
 	if err != nil {
-		return nil, errors.Join(LoadConfigError, err)
+		return nil, errors.Join(ErrLoadConfig, err)
 	}
 	config.Proto = proto
 
@@ -48,19 +48,19 @@ func LoadInternetConfig() (*InternetConfig, error) {
 	if proto == "static" {
 		ipaddr, err := getUCIValue(fmt.Sprintf("network.%s.ipaddr", WanInterfaceName))
 		if err != nil {
-			return nil, errors.Join(LoadConfigError, err)
+			return nil, errors.Join(ErrLoadConfig, err)
 		}
 		config.IPAddr = ipaddr
 
 		netmask, err := getUCIValue(fmt.Sprintf("network.%s.netmask", WanInterfaceName))
 		if err != nil {
-			return nil, errors.Join(LoadConfigError, err)
+			return nil, errors.Join(ErrLoadConfig, err)
 		}
 		config.Netmask = netmask
 
 		gateway, err := getUCIValue(fmt.Sprintf("network.%s.gateway", WanInterfaceName))
 		if err != nil {
-			return nil, errors.Join(LoadConfigError, err)
+			return nil, errors.Join(ErrLoadConfig, err)
 		}
 		config.Gateway = gateway
 	}
@@ -93,7 +93,7 @@ func LoadInternetConfig() (*InternetConfig, error) {
 
 func ApplyInternetConfig(config *InternetConfig) error {
 	if config.Proto != "dhcp" && config.Proto != "static" {
-		return errors.Join(InvalidConfigError, fmt.Errorf("invalid internet protocol: %s", config.Proto))
+		return errors.Join(ErrInvalidConfig, fmt.Errorf("invalid internet protocol: %s", config.Proto))
 	}
 
 	var applyCommands []string
@@ -105,36 +105,36 @@ func ApplyInternetConfig(config *InternetConfig) error {
 			err := checkValidIP(config.IPAddr)
 
 			if err != nil {
-				return errors.Join(InvalidConfigError, err)
+				return errors.Join(ErrInvalidConfig, err)
 			}
 
 			applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.ipaddr=%s", WanInterfaceName, config.IPAddr))
 		} else {
-			return errors.Join(InvalidConfigError, fmt.Errorf("ip address value is required"))
+			return errors.Join(ErrInvalidConfig, fmt.Errorf("ip address value is required"))
 		}
 
 		if config.Netmask != "" {
 			err := checkValidIP(config.Netmask)
 
 			if err != nil {
-				return errors.Join(InvalidConfigError, err)
+				return errors.Join(ErrInvalidConfig, err)
 			}
 
 			applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.netmask=%s", WanInterfaceName, config.Netmask))
 		} else {
-			return errors.Join(InvalidConfigError, fmt.Errorf("netmask value is required"))
+			return errors.Join(ErrInvalidConfig, fmt.Errorf("netmask value is required"))
 		}
 
 		if config.Gateway != "" {
 			err := checkValidIP(config.Gateway)
 
 			if err != nil {
-				return errors.Join(InvalidConfigError, err)
+				return errors.Join(ErrInvalidConfig, err)
 			}
 
 			applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.gateway=%s", WanInterfaceName, config.Gateway))
 		} else {
-			return errors.Join(InvalidConfigError, fmt.Errorf("gateway value is required"))
+			return errors.Join(ErrInvalidConfig, fmt.Errorf("gateway value is required"))
 		}
 	}
 
@@ -143,7 +143,7 @@ func ApplyInternetConfig(config *InternetConfig) error {
 			err := checkValidIP(dns)
 
 			if err != nil {
-				return errors.Join(InvalidConfigError, err)
+				return errors.Join(ErrInvalidConfig, err)
 			}
 		}
 
@@ -155,7 +155,7 @@ func ApplyInternetConfig(config *InternetConfig) error {
 		err := checkValidMAC(config.MACAddr)
 
 		if err != nil {
-			return errors.Join(InvalidConfigError, err)
+			return errors.Join(ErrInvalidConfig, err)
 		}
 
 		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.macaddr=%s", WanInterfaceName, config.MACAddr))
@@ -168,16 +168,16 @@ func ApplyInternetConfig(config *InternetConfig) error {
 	for _, command := range applyCommands {
 		cmd := exec.Command("uci", strings.Split(command, " ")...)
 		if err := cmd.Run(); err != nil {
-			return errors.Join(InvalidConfigError, fmt.Errorf("failed to run uci command, %s: %v", cmd, err))
+			return errors.Join(ErrInvalidConfig, fmt.Errorf("failed to run uci command, %s: %v", cmd, err))
 		}
 	}
 
 	if err := exec.Command("uci", "commit", "network").Run(); err != nil {
-		return errors.Join(InvalidConfigError, fmt.Errorf("failed to commit changes: %v", err))
+		return errors.Join(ErrInvalidConfig, fmt.Errorf("failed to commit changes: %v", err))
 	}
 
 	if err := exec.Command("/etc/init.d/network", "restart").Run(); err != nil {
-		return errors.Join(InvalidConfigError, fmt.Errorf("failed to restart network: %v", err))
+		return errors.Join(ErrInvalidConfig, fmt.Errorf("failed to restart network: %v", err))
 	}
 
 	return nil

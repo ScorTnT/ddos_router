@@ -26,39 +26,39 @@ func ApplyIntranetConfig(config *IntranetConfig) error {
 		err := checkValidIP(config.IPAddress)
 
 		if err != nil {
-			return errors.Join(InvalidConfigError, err)
+			return errors.Join(ErrInvalidConfig, err)
 		}
 
 		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.ipaddr=%s", LanInterfaceName, config.IPAddress))
 	} else {
-		return errors.Join(InvalidConfigError, fmt.Errorf("ip address value is required"))
+		return errors.Join(ErrInvalidConfig, fmt.Errorf("ip address value is required"))
 	}
 
 	if config.Netmask != "" {
 		err := checkValidIP(config.Netmask)
 
 		if err != nil {
-			return errors.Join(InvalidConfigError, err)
+			return errors.Join(ErrInvalidConfig, err)
 		}
 
 		applyCommands = append(applyCommands, fmt.Sprintf("set network.%s.netmask=%s", LanInterfaceName, config.Netmask))
 	} else {
-		return errors.Join(InvalidConfigError, fmt.Errorf("netmask value is required"))
+		return errors.Join(ErrInvalidConfig, fmt.Errorf("netmask value is required"))
 	}
 
 	for _, command := range applyCommands {
 		cmd := exec.Command("uci", strings.Split(command, " ")...)
 		if err := cmd.Run(); err != nil {
-			return errors.Join(InvalidConfigError, fmt.Errorf("failed to run uci command, %s: %v", cmd, err))
+			return errors.Join(ErrInvalidConfig, fmt.Errorf("failed to run uci command, %s: %v", cmd, err))
 		}
 	}
 
 	if err := exec.Command("uci", "commit", "network").Run(); err != nil {
-		return errors.Join(InvalidConfigError, fmt.Errorf("failed to commit changes: %v", err))
+		return errors.Join(ErrInvalidConfig, fmt.Errorf("failed to commit changes: %v", err))
 	}
 
 	if err := exec.Command("/etc/init.d/network", "restart").Run(); err != nil {
-		return errors.Join(InvalidConfigError, fmt.Errorf("failed to restart network: %v", err))
+		return errors.Join(ErrInvalidConfig, fmt.Errorf("failed to restart network: %v", err))
 	}
 
 	return nil
