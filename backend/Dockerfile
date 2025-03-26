@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 # Install required packages
 RUN apk add --no-cache \
@@ -35,9 +35,9 @@ RUN wget http://www.tcpdump.org/release/libpcap-1.10.4.tar.gz \
     && tar -xzf libpcap-1.10.4.tar.gz \
     && cd libpcap-1.10.4 \
     && CC=aarch64-linux-musl-gcc \
-       AC_CV_HEADER_LINUX_IF_PACKET_H=yes \
-       ac_cv_linux_vers=2 \
-       ./configure --host=aarch64-linux-musl --with-pcap=linux \
+    AC_CV_HEADER_LINUX_IF_PACKET_H=yes \
+    ac_cv_linux_vers=2 \
+    ./configure --host=aarch64-linux-musl --with-pcap=linux \
     && make \
     && make install DESTDIR=/opt/cross-root \
     && cd .. \
