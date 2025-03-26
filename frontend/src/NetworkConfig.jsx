@@ -35,7 +35,8 @@ function NetworkConfig() {
         const data = await LoadInternetConfig();
         console.log(data);
         if (data) {
-            setConnectionType(data.connection_type || "error");
+            console.log(data.connection_type);
+            setConnectionType(data.connection_type);
             setIpAddress(data.ip_addr || "error");
             setSubnetMask(data.netmask || "error");
             setGateway(data.gateway || "error");
