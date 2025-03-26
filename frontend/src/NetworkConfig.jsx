@@ -39,7 +39,7 @@ function NetworkConfig() {
             setIpAddress(data.ip_addr || "error");
             setSubnetMask(data.netmask || "error");
             setGateway(data.gateway || "error");
-
+            console.log(connectionType)
             if (connectionType == "dhcp") {
                 setIpAddress(dhcpLabel);
                 setSubnetMask(dhcpLabel);
