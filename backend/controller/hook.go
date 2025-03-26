@@ -17,5 +17,9 @@ func HookHandler(app *fiber.App) {
 	app.Get("/router_info", GetRouterInfo)
 	app.Get("/arp", GetArpPing)
 
+	app.Get("/firewall", GetLockedIPs)
+	app.Post("/firewall", LockIP)
+	app.Delete("/firewall", UnlockIP)
+
 	app.Get("/", Index)
 }
