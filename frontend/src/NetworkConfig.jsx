@@ -37,9 +37,13 @@ function NetworkConfig() {
         if (data) {
             console.log(data.connection_type);
             setConnectionType(data.connection_type);
+            console.log(connectionType)
             setIpAddress(data.ip_addr || "error");
+            console.log(data.ip_addr)
             setSubnetMask(data.netmask || "error");
+            console.log(data.netmask)  
             setGateway(data.gateway || "error");
+            console.log(data.gateway)
             console.log(connectionType)
             if (connectionType == "dhcp") {
                 setIpAddress(dhcpLabel);
