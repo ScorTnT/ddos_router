@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 func InitFirewall() error {
@@ -76,4 +77,41 @@ func UnblockIP(ip string) error {
 	}
 	fmt.Printf("Successfully unblocked IP: %s\n", ip)
 	return nil
+}
+
+func GetBlockedIPs() ([]string, error) {
+	cmd := exec.Command("nft", "list", "set", "inet", "ddos_filter", "ban_set")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get blocked IPs: %v\nOutput: %s", err, output)
+	}
+
+	// Parse the output to extract IP addresses
+	outputStr := string(output)
+	var blockedIPs []string
+
+	// Find the "elements =" line and extract the IP addresses
+	lines := strings.Split(outputStr, "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "elements =") {
+			// Extract the part between "{ " and " }"
+			start := strings.Index(line, "{")
+			end := strings.LastIndex(line, "}")
+
+			if start != -1 && end != -1 && end > start {
+				elementsStr := line[start+1 : end]
+				// Split by comma and trim spaces
+				elements := strings.Split(elementsStr, ",")
+				for _, ip := range elements {
+					ip = strings.TrimSpace(ip)
+					if ip != "" {
+						blockedIPs = append(blockedIPs, ip)
+					}
+				}
+			}
+			break
+		}
+	}
+
+	return blockedIPs, nil
 }

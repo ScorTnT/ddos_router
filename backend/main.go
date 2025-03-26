@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"log"
 
 	"github.com/ScorTnT/ddos_router/backend/config"
 	"github.com/ScorTnT/ddos_router/backend/controller"
@@ -31,6 +32,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	config.InitFirewall()
+	defer config.CleanupFirewall()
 
 	log.Fatal(app.Listen(":2024"))
 }
