@@ -20,13 +20,13 @@ import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("dhcp");
-    const [ipAddress, setIpAddress] = useState("220.66.87.40");
-    const [subnetMask, setSubnetMask] = useState("255.255.255.0");
-    const [gateway, setGateway] = useState("220.66.87.2");
-    const [primaryDNS, setPrimaryDNS] = useState("8.8.8.8");
-    const [secondaryDNS, setSecondaryDNS] = useState("8.8.4.4");
+    const [ipAddress, setIpAddress] = useState("");
+    const [subnetMask, setSubnetMask] = useState("");
+    const [gateway, setGateway] = useState("");
+    const [primaryDNS, setPrimaryDNS] = useState("");
+    const [secondaryDNS, setSecondaryDNS] = useState("");
     const [wanMacAddress, setWanMacAddress] = useState("");
-    const [mtu, setMtu] = useState("1500");
+    const [mtu, setMtu] = useState("");
     const [manualDns, setManualDns] = useState(true);
     const [macAddressChange, setMacAddressChange] = useState(true);
     const [manualMtu, setManualMtu] = useState(false);
@@ -38,7 +38,8 @@ function NetworkConfig() {
             setIpAddress(data.ip_addr || "error");
             setSubnetMask(data.netmask || "error");
             setGateway(data.gateway || "error");
-            if (connectionType === "dhcp") {
+            
+            if (connectionType == "dhcp") {
                 setIpAddress(dhcpLabel);
                 setSubnetMask(dhcpLabel);
                 setGateway(dhcpLabel);
@@ -47,8 +48,8 @@ function NetworkConfig() {
             setSecondaryDNS(data.dns_list[1] || "error");
             setWanMacAddress(data.mac_addr || "");
             setMtu(data.mtu || "error");
-            setManualDns(data.use_custom_dns || false);
-            setMacAddressChange(data.clone_mac || false);
+            setManualDns(data.is_custom_dns || false);
+            setMacAddressChange(data.is_custom_mac || false);
             setManualMtu(data.manualMtu || false);
         }
     };
