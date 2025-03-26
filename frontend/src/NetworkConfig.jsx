@@ -27,18 +27,19 @@ function NetworkConfig() {
     const [secondaryDNS, setSecondaryDNS] = useState("");
     const [wanMacAddress, setWanMacAddress] = useState("");
     const [mtu, setMtu] = useState("");
-    const [manualDns, setManualDns] = useState(true);
-    const [macAddressChange, setMacAddressChange] = useState(true);
-    const [manualMtu, setManualMtu] = useState(false);
+    const [manualDns, setManualDns] = useState();
+    const [macAddressChange, setMacAddressChange] = useState();
+    const [manualMtu, setManualMtu] = useState();
     const dhcpLabel = "dhcp 설정 사용중";
     const fetchInternetData = async () => {
         const data = await LoadInternetConfig();
+        console.log(data);
         if (data) {
             setConnectionType(data.connection_type || "error");
             setIpAddress(data.ip_addr || "error");
             setSubnetMask(data.netmask || "error");
             setGateway(data.gateway || "error");
-            
+
             if (connectionType == "dhcp") {
                 setIpAddress(dhcpLabel);
                 setSubnetMask(dhcpLabel);
@@ -62,8 +63,8 @@ function NetworkConfig() {
             dns_list: [primaryDNS, secondaryDNS],
             mac_addr: wanMacAddress,
             mtu: mtu,
-            use_custom_dns: manualDns,
-            clone_mac: macAddressChange,
+            is_custom_dns: manualDns,
+            is_custom_mac: macAddressChange,
             manualMtu: manualMtu,
         };
     
