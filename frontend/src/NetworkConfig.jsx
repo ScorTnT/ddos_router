@@ -19,35 +19,43 @@ import {
 import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 
 function NetworkConfig() {
-    const [connectionType, setConnectionType] = useState("dhcp"); // 동적 IP 방식 기본값
-    const [ipAddress, setIpAddress] = useState("220.66.87.40");
-    const [subnetMask, setSubnetMask] = useState("255.255.255.0");
-    const [gateway, setGateway] = useState("220.66.87.2");
-    const [primaryDNS, setPrimaryDNS] = useState("8.8.8.8");
-    const [secondaryDNS, setSecondaryDNS] = useState("8.8.4.4");
-    const [wanMacAddress, setWanMacAddress] = useState(""); // 선택한 MAC 주소 저장
-    const [mtu, setMtu] = useState("1500");
-    const [manualDns, setManualDns] = useState(true);
-    const [macAddressChange, setMacAddressChange] = useState(true);
-    const [manualMtu, setManualMtu] = useState(false);
+    const [connectionType, setConnectionType] = useState("");
+    const [ipAddress, setIpAddress] = useState("");
+    const [subnetMask, setSubnetMask] = useState("");
+    const [gateway, setGateway] = useState("");
+    const [primaryDNS, setPrimaryDNS] = useState("");
+    const [secondaryDNS, setSecondaryDNS] = useState("");
+    const [wanMacAddress, setWanMacAddress] = useState("");
+    const [mtu, setMtu] = useState("");
+    const [manualDns, setManualDns] = useState();
+    const [macAddressChange, setMacAddressChange] = useState();
+    const [manualMtu, setManualMtu] = useState();
+    const dhcpLabel = "dhcp 설정 사용중";
     const fetchInternetData = async () => {
         const data = await LoadInternetConfig();
+        console.log(data);
         if (data) {
-            setConnectionType(data.connection_type || "error");
+            console.log(data.connection_type);
+            setConnectionType(data.connection_type);
+            console.log(connectionType)
             setIpAddress(data.ip_addr || "error");
+            console.log(data.ip_addr)
             setSubnetMask(data.netmask || "error");
+            console.log(data.netmask)  
             setGateway(data.gateway || "error");
-            if (connectionType === "dhcp") {
-                setIpAddress("dhcp 설정 사용중");
-                setSubnetMask("dhcp 설정 사용중");
-                setGateway("dhcp 설정 사용중");
+            console.log(data.gateway)
+            console.log(connectionType)
+            if (connectionType == "dhcp") {
+                setIpAddress(dhcpLabel);
+                setSubnetMask(dhcpLabel);
+                setGateway(dhcpLabel);
             }
             setPrimaryDNS(data.dns_list[0] || "error");
             setSecondaryDNS(data.dns_list[1] || "error");
             setWanMacAddress(data.mac_addr || "");
             setMtu(data.mtu || "error");
-            setManualDns(data.use_custom_dns || false);
-            setMacAddressChange(data.clone_mac || false);
+            setManualDns(data.is_custom_dns || false);
+            setMacAddressChange(data.is_custom_mac || false);
             setManualMtu(data.manualMtu || false);
         }
     };
@@ -60,8 +68,8 @@ function NetworkConfig() {
             dns_list: [primaryDNS, secondaryDNS],
             mac_addr: wanMacAddress,
             mtu: mtu,
-            use_custom_dns: manualDns,
-            clone_mac: macAddressChange,
+            is_custom_dns: manualDns,
+            is_custom_mac: macAddressChange,
             manualMtu: manualMtu,
         };
     
@@ -102,7 +110,19 @@ function NetworkConfig() {
                         <RadioGroup
                             row
                             value={connectionType}
-                            onChange={(e) => setConnectionType(e.target.value)}
+                            onChange={(e) => {
+                                setConnectionType(e.target.value)
+                                if (e.target.value === "dhcp") {
+                                    setIpAddress(dhcpLabel);
+                                    setSubnetMask(dhcpLabel);
+                                    setGateway(dhcpLabel);
+                                }
+                                else if( e.target.value === "static"){
+                                    setIpAddress("");
+                                    setSubnetMask("");
+                                    setGateway("");
+                                }
+                            }}
                             sx={{ marginLeft: 2 }}
                         >
                             <FormControlLabel
