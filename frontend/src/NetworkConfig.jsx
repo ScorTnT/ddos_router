@@ -19,7 +19,7 @@ import {
 import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 
 function NetworkConfig() {
-    const [connectionType, setConnectionType] = useState("dhcp");
+    const [connectionType, setConnectionType] = useState("");
     const [ipAddress, setIpAddress] = useState("");
     const [subnetMask, setSubnetMask] = useState("");
     const [gateway, setGateway] = useState("");
