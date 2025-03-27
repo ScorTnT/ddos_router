@@ -37,7 +37,7 @@ func CleanupFirewall() error {
 // BlockIP adds an IP address to the ban set
 func BlockIP(ip string) error {
 	err := modifyBanSet("add", ip)
-	if err == nil {
+	if err != nil {
 		return err
 	}
 	return nil

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,8 +34,15 @@ func main() {
 		panic(err)
 	}
 
-	config.InitFirewall()
-	defer config.CleanupFirewall()
+	if err = config.InitFirewall(); err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err := config.CleanupFirewall(); err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	log.Fatal(app.Listen(":2024"))
 }
