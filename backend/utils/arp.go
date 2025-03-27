@@ -30,7 +30,12 @@ func GetARPTable() ([]ARPEntry, error) {
 	for _, line := range lines {
 		fields := strings.Fields(line)
 		// ip neigh 출력 형식: <IP> dev <interface> lladdr <MAC> REACHABLE
-		if len(fields) >= 5 && fields[3] == "lladdr" && isValidMAC(fields[4]) {
+		// 인터페이스명이 "br-lan"인 경우만 추가
+		if len(fields) >= 5 &&
+			fields[1] == "dev" &&
+			fields[2] == "br-lan" &&
+			fields[3] == "lladdr" &&
+			isValidMAC(fields[4]) {
 			entry := ARPEntry{
 				IP:  fields[0],
 				MAC: fields[4],
