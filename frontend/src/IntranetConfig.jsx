@@ -19,6 +19,21 @@ import { getArpInfo } from './api/arpConfig';
 function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("192.168.0.1");
     const [subnetMask, setSubnetMask] = useState("255.255.255.0");
+    function fetchIntranetConfig() {
+        LoadIntranetConfig().then((data) => {
+            if (data) {
+                setIpAddress(data.IPAddress || "");
+                setSubnetMask(data.Netmask || "");
+            }
+        }).catch((error) => {
+            console.error("Error loading intranet config:", error);
+        });
+    }
+    useEffect(() => {
+        fetchIntranetConfig();
+    }
+    , []);
+
     return (
         <Stack spacing={2}>
         <Card>
