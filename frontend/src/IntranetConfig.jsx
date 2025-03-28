@@ -73,13 +73,13 @@ function IntranetConfig() {
                 </Stack>
             </CardContent>
         </Card>
-        <IntranetIP></IntranetIP>
+        <IntranetIP gateway={ipAddress}></IntranetIP>
         </Stack>
     );
 }
-function IntranetIP() {
+function IntranetIP(data) {
     const [intranetConnection, setIntranetConnection] = useState([]);
-
+    const gatewayPrefix = data.gateway.split('.').slice(0, 3).join('.');
     const fetchIntranetConfig = async () => {
         try {
             const intranetData = await getArpInfo();
@@ -110,11 +110,15 @@ function IntranetIP() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {intranetConnection.map((row) => (
+                            {intranetConnection.map((row) => {
+                                const rowIpPrefix = row.ip.split('.').slice(0, 3).join('.');
+                                if(rowIpPrefix !== gatewayPrefix) return null; // Skip the row if it matches the gateway IP
+                                return (
                                 <TableRow key={row.ip}>
                                     <TableCell>{row.ip}</TableCell>
                                 </TableRow>
-                            ))}
+                            )}
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
