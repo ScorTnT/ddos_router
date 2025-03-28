@@ -251,7 +251,7 @@ function InfoPanel() {
                                     
                                     // ))
                                     connectionLog.map((log, index) => {
-                                        if (log.source_port === log.dest_port) return null;
+                                        if (log.source_ip === log.dest_ip) return null;
                                         return (
                                           <TableRow key={index}>
                                             <TableCell>{log.protocol}</TableCell>
