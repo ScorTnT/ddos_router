@@ -225,30 +225,55 @@ function InfoPanel() {
                                     </TableRow>
                                 ) : (
                                     // 정상적으로 데이터가 있을 경우
-                                    connectionLog.map((log, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{log.protocol}</TableCell>
+                                    // connectionLog.map((log, index) => (
+                                    //     <TableRow key={index}>
+                                    //         <TableCell>{log.protocol}</TableCell>
 
-                                            <TableCell
-                                                sx={{ cursor : 'pointer', color : 'blue'}}
-                                                onclick={() => setSelectedIP(log.source_ip)}
-                                            >
-                                                {log.source_ip}
-                                            </TableCell>
+                                    //         <TableCell
+                                    //             sx={{ cursor : 'pointer', color : 'blue'}}
+                                    //             onclick={() => setSelectedIP(log.source_ip)}
+                                    //         >
+                                    //             {log.source_ip}
+                                    //         </TableCell>
 
-                                            <TableCell
-                                                sx={{ cursor : 'pointer', color : 'blue'}}
-                                                onclick={() => setSelectedIP(log.dest_ip)}
-                                            >
-                                                {log.dest_ip}
-                                            </TableCell>
+                                    //         <TableCell
+                                    //             sx={{ cursor : 'pointer', color : 'blue'}}
+                                    //             onclick={() => setSelectedIP(log.dest_ip)}
+                                    //         >
+                                    //             {log.dest_ip}
+                                    //         </TableCell>
                                             
+                                    //         <TableCell>{log.source_port}</TableCell>
+                                    //         <TableCell>{log.dest_port}</TableCell>
+                                    //         <TableCell>{log.packet_count}</TableCell>
+                                    //         <TableCell>{log.byte_count}</TableCell>
+                                    //     </TableRow>
+                                    
+                                    // ))
+                                    connectionLog.map((log, index) => {
+                                        if (log.source_port === log.dest_port) return null;
+                                        return (
+                                          <TableRow key={index}>
+                                            <TableCell>{log.protocol}</TableCell>
+                                            <TableCell
+                                              sx={{ cursor: 'pointer', color: 'blue' }}
+                                              onClick={() => setSelectedIP(log.source_ip)}
+                                            >
+                                              {log.source_ip}
+                                            </TableCell>
+                                            <TableCell
+                                              sx={{ cursor: 'pointer', color: 'blue' }}
+                                              onClick={() => setSelectedIP(log.dest_ip)}
+                                            >
+                                              {log.dest_ip}
+                                            </TableCell>
                                             <TableCell>{log.source_port}</TableCell>
                                             <TableCell>{log.dest_port}</TableCell>
                                             <TableCell>{log.packet_count}</TableCell>
                                             <TableCell>{log.byte_count}</TableCell>
-                                        </TableRow>
-                                    ))
+                                          </TableRow>
+                                        );
+                                      })
                                 )}
                             </TableBody>
                         </Table>
