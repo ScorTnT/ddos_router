@@ -12,8 +12,11 @@ import {
     TableRow,
     TableCell,
     Paper,
-    Typography
+    Typography,
+    Tooltip,
+    IconButton
 } from "@mui/material";
+import { Refresh as RefreshIcon } from '@mui/icons-material';
 import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
 import { getArpInfo } from './api/arpConfig';
 function IntranetConfig() {
@@ -77,9 +80,9 @@ function IntranetConfig() {
         </Stack>
     );
 }
-function IntranetIP(data) {
+function IntranetIP({ gateway }) {
     const [intranetConnection, setIntranetConnection] = useState([]);
-    const gatewayPrefix = data.gateway.split('.').slice(0, 3).join('.');
+    const gatewayPrefix = gateway.split('.').slice(0, 3).join('.');
     const fetchIntranetConfig = async () => {
         try {
             const intranetData = await getArpInfo();
@@ -103,11 +106,11 @@ function IntranetIP(data) {
                     내부 IP 목록
                 </Typography>
                 
-                {/* <Tooltip title="수동 업데이트">
+                <Tooltip title="수동 업데이트">
                     <IconButton onClick={() => fetchIntranetConfig()}>
                         <RefreshIcon />
                     </IconButton>
-                </Tooltip> */}
+                </Tooltip>
 
                 <TableContainer component={Paper}>
                     <Table>
