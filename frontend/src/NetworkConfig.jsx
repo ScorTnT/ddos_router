@@ -17,7 +17,7 @@ import {
     Typography
 } from "@mui/material";
 import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
-
+import { getArpInfo } from './api/arpConfig'; 
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("");
     const [ipAddress, setIpAddress] = useState("");
@@ -30,21 +30,15 @@ function NetworkConfig() {
     const [manualDns, setManualDns] = useState();
     const [macAddressChange, setMacAddressChange] = useState();
     const [manualMtu, setManualMtu] = useState();
+    const [macOptions, setMacOptions] = useState([]);
     const dhcpLabel = "dhcp 설정 사용중";
     const fetchInternetData = async () => {
         const data = await LoadInternetConfig();
-        console.log(data);
         if (data) {
-            console.log(data.connection_type);
             setConnectionType(data.connection_type);
-            console.log(connectionType)
             setIpAddress(data.ip_addr || "error");
-            console.log(data.ip_addr)
             setSubnetMask(data.netmask || "error");
-            console.log(data.netmask)  
             setGateway(data.gateway || "error");
-            console.log(data.gateway)
-            console.log(connectionType)
             if (connectionType == "dhcp") {
                 setIpAddress(dhcpLabel);
                 setSubnetMask(dhcpLabel);
@@ -59,6 +53,13 @@ function NetworkConfig() {
             setManualMtu(data.manualMtu || false);
         }
     };
+    const fetchArpData = async () => {
+        const data = await getArpInfo();
+        if (data) {
+            const macAddresses = data.map((row) => row.mac);
+            setMacOptions(macAddresses);
+        }
+    }
     const saveConfig = async () => {
         const configData = {
             connection_type: connectionType,
@@ -82,19 +83,13 @@ function NetworkConfig() {
     };
     useEffect(()=>{
         fetchInternetData();
+        fetchArpData();
     }, []);
-
-    // 예시 MAC 주소 리스트
-    const macAddressOptions = [
-        "FF:AA:AA:99:6F:TE",
-        "C4:C3:KK:34:55:AR",
-        "TT:BE:JE:12:34:5K"
-    ];
 
     // macAddressChange가 비활성화되면 wanMacAddress를 첫 번째 항목으로 설정
     useEffect(() => {
         if (!macAddressChange) {
-            setWanMacAddress(macAddressOptions[0]);
+            setWanMacAddress(macOptions[0]);
         }
     }, [macAddressChange]);
 
