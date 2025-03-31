@@ -39,7 +39,7 @@ function NetworkConfig() {
             setIpAddress(data.ip_addr || "error");
             setSubnetMask(data.netmask || "error");
             setGateway(data.gateway || "error");
-            if (connectionType == "dhcp") {
+            if (data.connection_type == "dhcp") {
                 setIpAddress(dhcpLabel);
                 setSubnetMask(dhcpLabel);
                 setGateway(dhcpLabel);
@@ -91,7 +91,7 @@ function NetworkConfig() {
         if (!macAddressChange) {
             setWanMacAddress(macOptions[0]);
         }
-    }, [macAddressChange]);
+    }, [macAddressChange,macOptions]);
 
     return (
         <Card>
@@ -184,7 +184,7 @@ function NetworkConfig() {
                             value={wanMacAddress}
                             onChange={(e) => setWanMacAddress(e.target.value)}
                         >
-                            {macAddressOptions.map((mac, index) => (
+                            {macOptions.map((mac, index) => (
                                 <MenuItem key={index} value={mac}>
                                     {mac}
                                 </MenuItem>
