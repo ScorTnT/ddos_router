@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 import { getArpInfo } from './api/arpConfig'; 
+import { getRouterInfo } from './api/getRouterInfo';
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("");
     const [ipAddress, setIpAddress] = useState("");
@@ -54,11 +55,22 @@ function NetworkConfig() {
         }
     };
     const fetchArpData = async () => {
+        const routerData = await getRouterInfo();
+        let routerMac = null;
+        if (routerData) {
+            const macRow = routerData.find((row) => row.name === "MAC 주소");
+            if (macRow) {
+                routerMac = macRow.value;
+            }
+        }
         const data = await getArpInfo();
         if (data) {
             const macAddresses = data.map((row) => row.mac);
-            setMacOptions(macAddresses);
+            const uniqueMacAddresses = Array.from(new Set(macAddresses));
+            const updatedMacOptions = [routerMac, ...uniqueMacAddresses.filter(mac => mac !== routerMac)];
+            setMacOptions(updatedMacOptions);
         }
+
     }
     const saveConfig = async () => {
         const configData = {
