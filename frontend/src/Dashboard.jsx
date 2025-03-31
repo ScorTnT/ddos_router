@@ -113,7 +113,6 @@ function InfoPanel() {
     const [connectionLog, setConnectionLog] = useState([]);
     const [isAutoUpdate, setIsAutoUpdate] = useState(true);
     const [updateError, setUpdateError] = useState(null);
-
     const [selectedIP, setSelectedIP] = useState(null);
     const [ipInfo, setIpInfo] = useState([]);
 
@@ -141,26 +140,41 @@ function InfoPanel() {
         fetchRouterInfo();
     }, []);
 
+    // useEffect(() => {
+    //     let intervalId;
+    //     if (isAutoUpdate) {
+    //         intervalId = setInterval(fetchRouterInfo, 5000);
+    //     }
+    //     return () => {
+    //         if (intervalId) {
+    //             clearInterval(intervalId);
+    //         }
+    //     };
+    // }, [isAutoUpdate]);
+
     useEffect(() => {
-        let intervalId;
-        if (isAutoUpdate) {
-            intervalId = setInterval(fetchRouterInfo, 5000);
-        }
-        return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
-        };
+        if (!isAutoUpdate) return;
+        
+        const intervalId = setInterval(fetchRouterInfo, 5000);
+        return () => clearInterval(intervalId);
     }, [isAutoUpdate]);
+
+    // useEffect(() => {
+    //     if (selectedIP) {          
+    //         const filteredLog = connectionLog.filter(
+    //             (log) => log.source_ip === selectedIP || log.dest_ip === selectedIP
+    //         );
+    //         setIpInfo(filteredLog);
+    //     } else {
+    //         setIpInfo([]);
+    //     }
+    // }, [selectedIP, connectionLog]);
 
     useEffect(() => {
         if (selectedIP) {
-            const filteredLog = connectionLog.filter(
-                (log) => log.source_ip === selectedIP || log.dest_ip === selectedIP
-            );
-            setIpInfo(filteredLog);
-        } else {
-            setIpInfo([]);
+            setIpInfo(connectionLog.filter(log => 
+                log.source_ip === selectedIP || log.dest_ip === selectedIP
+            ));
         }
     }, [selectedIP, connectionLog]);
 
@@ -208,7 +222,8 @@ function InfoPanel() {
                                     <TableCell sx={{ fontWeight: 'bold' }}>바이트 수</TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+
+                            {/* <TableBody>
                                 { updateError ? (
                                     <TableRow>
                                         <TableCell colSpan={7} align="center">
@@ -275,7 +290,42 @@ function InfoPanel() {
                                         );
                                       })
                                 )}
+                            </TableBody> */}
+
+                            <TableBody>
+                                {updateError ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center">
+                                            <Typography color="error" variant="body1">
+                                                {updateError}
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : connectionLog.map((log, index) => (
+                                    log.source_ip === log.dest_ip ? null : (
+                                        <TableRow key={index}>
+                                            <TableCell>{log.protocol}</TableCell>
+                                            <TableCell 
+                                                sx={{ cursor: 'pointer', color: 'blue' }} 
+                                                onClick={() => setSelectedIP(log.source_ip)}
+                                            >
+                                                {log.source_ip}
+                                            </TableCell>
+                                            <TableCell sx={{ cursor: 'pointer', color: 'blue' }} 
+                                            onClick={() => setSelectedIP(log.dest_ip)}
+                                            >
+                                                {log.dest_ip}
+                                            </TableCell>
+                                            <TableCell>{log.source_port}</TableCell>
+                                            <TableCell>{log.dest_port}</TableCell>
+                                            <TableCell>{log.packet_count}</TableCell>
+                                            <TableCell>{log.byte_count}</TableCell>
+                                        </TableRow>
+                                    )
+                                ))}
                             </TableBody>
+
+
                         </Table>
                     </TableContainer>
                 </CardContent>
