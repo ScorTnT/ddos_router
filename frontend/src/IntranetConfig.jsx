@@ -17,8 +17,8 @@ import {
 import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
 import { getArpInfo } from './api/arpConfig';
 function IntranetConfig() {
-    const [ipAddress, setIpAddress] = useState("192.168.0.1");
-    const [subnetMask, setSubnetMask] = useState("255.255.255.0");
+    const [ipAddress, setIpAddress] = useState("");
+    const [subnetMask, setSubnetMask] = useState("");
     function fetchIntranetConfig() {
         LoadIntranetConfig().then((data) => {
             if (data) {
@@ -102,6 +102,13 @@ function IntranetIP(data) {
                 <Typography variant="h6" gutterBottom>
                     내부 IP 목록
                 </Typography>
+                
+                <Tooltip title="수동 업데이트">
+                    <IconButton onClick={fetchIntranetConfig()}>
+                        <RefreshIcon />
+                    </IconButton>
+                </Tooltip>
+
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
