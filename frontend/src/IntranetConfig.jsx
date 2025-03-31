@@ -104,7 +104,7 @@ function IntranetIP(data) {
                 </Typography>
                 
                 <Tooltip title="수동 업데이트">
-                    <IconButton onClick={fetchIntranetConfig()}>
+                    <IconButton onClick={() => fetchIntranetConfig()}>
                         <RefreshIcon />
                     </IconButton>
                 </Tooltip>
