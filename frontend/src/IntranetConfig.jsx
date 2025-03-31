@@ -103,11 +103,11 @@ function IntranetIP(data) {
                     내부 IP 목록
                 </Typography>
                 
-                <Tooltip title="수동 업데이트">
+                {/* <Tooltip title="수동 업데이트">
                     <IconButton onClick={() => fetchIntranetConfig()}>
                         <RefreshIcon />
                     </IconButton>
-                </Tooltip>
+                </Tooltip> */}
 
                 <TableContainer component={Paper}>
                     <Table>
