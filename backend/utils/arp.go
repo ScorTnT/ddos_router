@@ -15,7 +15,7 @@ type ARPEntry struct {
 
 // GetARPTable 함수 정의
 func GetARPTable() ([]ARPEntry, error) {
-	cmd := exec.Command("ip", "neigh")
+	cmd := exec.Command("ip", "neigh", "show", "nud", "reachable")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
