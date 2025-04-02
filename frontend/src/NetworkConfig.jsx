@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 import { getArpInfo } from './api/arpConfig'; 
+import { getArpNow } from './api/arpNow';
 import { getRouterInfo } from './api/getRouterInfo';
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("");
@@ -64,6 +65,8 @@ function NetworkConfig() {
             }
         }
         const data = await getArpInfo();
+        const data1 = await getArpNow();
+        console.log(data1);
         if (data) {
             const macAddresses = data.map((row) => row.mac);
             const uniqueMacAddresses = Array.from(new Set(macAddresses));
