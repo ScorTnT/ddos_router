@@ -115,7 +115,7 @@ function InfoPanel() {
     const [updateError, setUpdateError] = useState(null);
     const [selectedIP, setSelectedIP] = useState(null);
     const [ipInfo, setIpInfo] = useState([]);
-
+    const [logIndex, setLogIndex] = useState({});
     const fetchRouterInfo = async () => {
         try {
             const [routerData, connectionsData] = await Promise.all([
@@ -200,7 +200,7 @@ function InfoPanel() {
                                 </TableRow>
                             </TableHead>
 
-                            <TableBody>
+                            {/* <TableBody>
                                 {updateError ? (
                                     <TableRow>
                                         <TableCell colSpan={7} align="center">
@@ -231,8 +231,51 @@ function InfoPanel() {
                                         </TableRow>
                                     )
                                 ))}
-                            </TableBody>
+                            </TableBody> */}
+                            
+                            <TableBody>
+                                {updateError ? (
+                                    <TableRow>
+                                    <TableCell colSpan={7} align="center">
+                                        <Typography color="error" variant="body1">
+                                        {updateError}
+                                        </Typography>
+                                    </TableCell>
+                                    </TableRow>
+                                ) : connectionLog.map((log, index) => {
+                                    const key = `${log.protocol}${log.source_ip}${log.dest_ip}${log.source_port}`;
 
+                                    setLogIndex(prev => {
+                                        const existing = prev[key];
+                                        return {
+                                        ...prev,
+                                        [key]: existing !== undefined ? `${existing}${index}` : `${index}`
+                                        };
+                                    });
+                                    console.log(logIndex);
+                                    return log.source_ip === log.dest_ip ? null : (
+                                        <TableRow key={index}>
+                                        <TableCell>{log.protocol}</TableCell>
+                                        <TableCell
+                                            sx={{ cursor: 'pointer', color: 'blue' }}
+                                            onClick={() => setSelectedIP(log.source_ip)}
+                                        >
+                                            {log.source_ip}
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{ cursor: 'pointer', color: 'blue' }}
+                                            onClick={() => setSelectedIP(log.dest_ip)}
+                                        >
+                                            {log.dest_ip}
+                                        </TableCell>
+                                        <TableCell>{log.source_port}</TableCell>
+                                        <TableCell>{log.dest_port}</TableCell>
+                                        <TableCell>{log.packet_count}</TableCell>
+                                        <TableCell>{log.byte_count}</TableCell>
+                                        </TableRow>
+                                    );
+                                    })}
+                                </TableBody>
 
                         </Table>
                     </TableContainer>
