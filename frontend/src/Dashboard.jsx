@@ -196,42 +196,9 @@ function InfoPanel() {
                                     <TableCell sx={{ fontWeight: 'bold' }}>출발 포트</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold' }}>도착 포트</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold' }}>패킷 수</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>바이트 수</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>바이트 크기</TableCell>
                                 </TableRow>
                             </TableHead>
-
-                            {/* <TableBody>
-                                {updateError ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} align="center">
-                                            <Typography color="error" variant="body1">
-                                                {updateError}
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : connectionLog.map((log, index) => (
-                                    log.source_ip === log.dest_ip ? null : (
-                                        <TableRow key={index}>
-                                            <TableCell>{log.protocol}</TableCell>
-                                            <TableCell 
-                                                sx={{ cursor: 'pointer', color: 'blue' }} 
-                                                onClick={() => setSelectedIP(log.source_ip)}
-                                            >
-                                                {log.source_ip}
-                                            </TableCell>
-                                            <TableCell sx={{ cursor: 'pointer', color: 'blue' }} 
-                                            onClick={() => setSelectedIP(log.dest_ip)}
-                                            >
-                                                {log.dest_ip}
-                                            </TableCell>
-                                            <TableCell>{log.source_port}</TableCell>
-                                            <TableCell>{log.dest_port}</TableCell>
-                                            <TableCell>{log.packet_count}</TableCell>
-                                            <TableCell>{log.byte_count}</TableCell>
-                                        </TableRow>
-                                    )
-                                ))}
-                            </TableBody> */}
                             
                             <TableBody>
                                 {updateError ? (
