@@ -210,16 +210,14 @@ function InfoPanel() {
                                     </TableCell>
                                     </TableRow>
                                 ) : connectionLog.map((log, index) => {
-                                    const key = `${log.protocol}${log.source_ip}${log.dest_ip}${log.source_port}`;
-
-                                    setLogIndex(prev => {
-                                        const existing = prev[key];
-                                        return {
-                                        ...prev,
-                                        [key]: existing !== undefined ? `${existing}${index}` : `${index}`
-                                        };
-                                    });
-                                    console.log(logIndex);
+                                    //const key = `${log.protocol}${log.source_ip}${log.dest_ip}${log.source_port}`;
+                                    // setLogIndex(prev => {
+                                    //     const existing = prev[key];
+                                    //     return {
+                                    //     ...prev,
+                                    //     [key]: existing !== undefined ? `${existing}${index}` : `${index}`
+                                    //     };
+                                    // });
                                     return log.source_ip === log.dest_ip ? null : (
                                         <TableRow key={index}>
                                         <TableCell>{log.protocol}</TableCell>
