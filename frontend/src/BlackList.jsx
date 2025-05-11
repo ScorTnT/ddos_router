@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import PropTypes from "prop-types";
 
 function BlackList(){
     
@@ -10,7 +9,4 @@ function BlackList(){
         </>
 }
 
-BlackList.propTypes = {
-    setIsLoggedIn: PropTypes.func.isRequired
-}
 export default BlackList;
