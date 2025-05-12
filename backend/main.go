@@ -10,11 +10,7 @@ import (
 	"github.com/ScorTnT/ddos_router/backend/config"
 	"github.com/ScorTnT/ddos_router/backend/controller"
 	"github.com/ScorTnT/ddos_router/backend/database"
-
-	"context"
-	"time"
-
-	pm "github.com/ScorTnT/ddos_router/backend/protect_manager"
+	"github.com/ScorTnT/ddos_router/backend/protect_manager"
 )
 
 func main() {
@@ -49,27 +45,25 @@ func main() {
 		}
 	}()
 
-	/* Fiber, DB, Firewall 초기화 부분은 그대로 */
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// Snort 로그 경로와 필터 정의
-	const snortLog = "/var/log/snort/alert_json.txt"
-
-	// protect_manager + Snort Reader 한번에 생성
-	mgr := pm.NewWithReader(
-		30*time.Minute, // TTL
-		10*time.Second, // 만료 검사 주기
-		snortLog,       // Snort JSON 로그 파일
-		pm.BlockSrcIP,  // 필터 함수(예: src_ip 차단)
-		256,            // Reader 채널 버퍼
+	snortScanner := protect_manager.NewSnortScanner(
+		"/etc/snort/alert_json.txt",
+		128,
+		nil,
 	)
-	go mgr.Run(ctx)
 
-	/* 필요하다면 REST 등으로 수동 Protect 도 가능
-	   e.g. curl POST /alert {"ip":"198.51.100.1"} */
-	// router 설정 ...
+	protectManager, err := protect_manager.NewProtectManager(
+		5*60,
+		10,
+		snortScanner,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	protectManager.Start()
+	defer protectManager.Stop()
 
 	log.Fatal(app.Listen(":2024"))
 }
