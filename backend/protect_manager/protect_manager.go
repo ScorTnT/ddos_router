@@ -148,6 +148,7 @@ func (m *ProtectManager) Start() {
 	m.alertScanner.StartScan()
 
 	if m.ctx != nil {
+		log.Println("[ProtectManager] Start scanning")
 		go m.Run(m.ctx)
 	}
 }
@@ -156,6 +157,7 @@ func (m *ProtectManager) Stop() {
 	m.alertScanner.StopScan()
 
 	if m.cancel != nil {
+		log.Println("[ProtectManager] Stop scanning")
 		m.cancel()
 	}
 }

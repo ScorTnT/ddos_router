@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -52,8 +53,8 @@ func main() {
 	)
 
 	protectManager, err := protect_manager.NewProtectManager(
-		5*60,
-		10,
+		30*time.Second,
+		5*time.Second,
 		snortScanner,
 	)
 
@@ -65,5 +66,5 @@ func main() {
 	protectManager.Start()
 	defer protectManager.Stop()
 
-	log.Fatal(app.Listen(":2024"))
+	log.Fatal(app.Listen(":2028"))
 }

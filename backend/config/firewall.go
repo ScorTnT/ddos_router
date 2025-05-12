@@ -36,10 +36,6 @@ func CleanupFirewall() error {
 
 // BlockIP adds an IP address to the ban set
 func BlockIP(ip string) error {
-	// [테스트용] 신기능 테스트를 위해 임시 비활성화
-	fmt.Printf("[Firewall] Blocking IP: %s\n", ip)
-	return nil
-
 	err := modifyBanSet("add", ip)
 	if err != nil {
 		return err
@@ -49,10 +45,6 @@ func BlockIP(ip string) error {
 
 // UnblockIP removes an IP address from the ban set
 func UnblockIP(ip string) error {
-	// [테스트용] 신기능 테스트를 위해 임시 비활성화
-	fmt.Printf("[Firewall] Unblocking IP: %s\n", ip)
-	return nil
-
 	err := modifyBanSet("delete", ip)
 	if err != nil {
 		return err

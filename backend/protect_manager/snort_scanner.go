@@ -11,9 +11,10 @@ import (
 )
 
 type Alert struct {
-	EventType string `json:"event_type"`
-	SrcIP     string `json:"src_ip"`
-	DestIP    string `json:"dest_ip"`
+	Message       string `json:"msg"`
+	SourceIP      string `json:"src_addr"`
+	DestinationIP string `json:"dst_addr"`
+	Protocol      string `json:"proto"`
 }
 
 type FilterFunc func(a *Alert) (ip string, ok bool)
@@ -60,6 +61,7 @@ func (s *SnortScanner) Run(ctx context.Context) {
 			f, err = os.Open(s.logPath)
 		}
 	}
+	log.Printf("[SnortScanner] Open log file %s", s.logPath)
 
 	defer f.Close()
 
@@ -104,6 +106,7 @@ func (s *SnortScanner) StartScan() {
 		return
 	}
 
+	log.Printf("[SnortScanner] Start scanning %s", s.logPath)
 	go s.Run(s.ctx)
 }
 
@@ -113,6 +116,7 @@ func (s *SnortScanner) StopScan() {
 	}
 
 	if s.cancel != nil {
+		log.Printf("[SnortScanner] Stop scanning %s", s.logPath)
 		s.cancel()
 	}
 }
