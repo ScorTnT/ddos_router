@@ -15,12 +15,6 @@ import (
 )
 
 func main() {
-	app := fiber.New()
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-	}))
-	controller.HookHandler(app)
-
 	var err error
 
 	routerConfig, err := config.ReadConfig()
@@ -65,6 +59,12 @@ func main() {
 
 	protectManager.Start()
 	defer protectManager.Stop()
+
+	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+	}))
+	controller.HookHandler(app, protectManager)
 
 	log.Fatal(app.Listen(":2028"))
 }
