@@ -22,6 +22,9 @@ type Config struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 	} `yaml:"initial_admin"`
+	WebAPI struct {
+		ListenAddress string `yaml:"listen_address"`
+	} `yaml:"web_api"`
 }
 
 var configPath = "config.yml"

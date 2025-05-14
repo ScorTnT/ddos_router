@@ -66,5 +66,5 @@ func main() {
 	}))
 	controller.HookHandler(app, protectManager)
 
-	log.Fatal(app.Listen(":2028"))
+	log.Fatal(app.Listen(routerConfig.WebAPI.ListenAddress))
 }
