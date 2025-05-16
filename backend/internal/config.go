@@ -10,8 +10,14 @@ type WebAPIConfig struct {
 	ListenAddr string `yaml:"listen_addr"`
 }
 
+type InferfaceConfig struct {
+	WANInterface string `yaml:"wan_interface"`
+	LANInterface string `yaml:"lan_interface"`
+}
+
 type Config struct {
-	WebAPI WebAPIConfig `yaml:"web_api"`
+	WebAPI    WebAPIConfig    `yaml:"web_api"`
+	Interface InferfaceConfig `yaml:"interface"`
 }
 
 const configPath = "config.yaml"
