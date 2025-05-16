@@ -183,7 +183,7 @@ function InfoPanel() {
                     <TableContainer
                         component={Paper}
                         sx={{
-                            maxHeight: '300px', // 제한된 높이 설정
+                            maxHeight: '500', // 제한된 높이 설정
                             overflowY: 'auto', // 수직 스크롤 활성화
                         }}
                     >
@@ -210,14 +210,14 @@ function InfoPanel() {
                                     </TableCell>
                                     </TableRow>
                                 ) : connectionLog.map((log, index) => {
-                                    //const key = `${log.protocol}${log.source_ip}${log.dest_ip}${log.source_port}`;
-                                    // setLogIndex(prev => {
-                                    //     const existing = prev[key];
-                                    //     return {
-                                    //     ...prev,
-                                    //     [key]: existing !== undefined ? `${existing}${index}` : `${index}`
-                                    //     };
-                                    // });
+                                    
+                                    // const key = `${log.protocol}${log.source_ip}${log.dest_ip}${log.source_port}`;
+                                    // // prev -> next 형태를 명시적으로 반환
+                                    // setLogIndex(prev => ({
+                                    // ...prev,
+                                    // [key]: prev[key] !== undefined ? `${prev[key]},${index}` : `${index}`,
+                                    // }));
+
                                     return log.source_ip === log.dest_ip ? null : (
                                         <TableRow key={index}>
                                         <TableCell>{log.protocol}</TableCell>
@@ -240,7 +240,7 @@ function InfoPanel() {
                                         </TableRow>
                                     );
                                     })}
-                                </TableBody>
+                            </TableBody>
 
                         </Table>
                     </TableContainer>
