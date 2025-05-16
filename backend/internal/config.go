@@ -15,9 +15,21 @@ type InferfaceConfig struct {
 	LANInterface string `yaml:"lan_interface"`
 }
 
+type SnortAlertScannerConfig struct {
+	SnortLogPath string `yaml:"snort_log_path"`
+	BufferSize   int    `yaml:"buffer_size"`
+}
+
+type ProtectionConfig struct {
+	ProtectionTTL int `yaml:"protection_ttl"`
+	RefreshTick   int `yaml:"refresh_tick"`
+}
+
 type Config struct {
-	WebAPI    WebAPIConfig    `yaml:"web_api"`
-	Interface InferfaceConfig `yaml:"interface"`
+	WebAPI     WebAPIConfig            `yaml:"web_api"`
+	Interface  InferfaceConfig         `yaml:"interface"`
+	Snort      SnortAlertScannerConfig `yaml:"snort"`
+	Protection ProtectionConfig        `yaml:"protection"`
 }
 
 const configPath = "config.yaml"
