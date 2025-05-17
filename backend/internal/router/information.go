@@ -28,7 +28,7 @@ type Information struct {
 }
 
 func GetInformation(config *internal.Config) (*Information, error) {
-	interfaceName := config.Interface.WANInterface
+	interfaceName := config.Interface.WANInterfaceName
 	if interfaceName == "" {
 		return nil, fmt.Errorf("interface name parameter cannot be empty")
 	}

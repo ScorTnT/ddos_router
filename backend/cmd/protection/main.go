@@ -27,8 +27,8 @@ func main() {
 				ListenAddr: ":2024",
 			},
 			Interface: internal.InferfaceConfig{
-				WANInterface: "eth0",
-				LANInterface: "eth1",
+				WANInterfaceName: "eth0",
+				LANInterfaceName: "eth1",
 			},
 			Snort: internal.SnortAlertScannerConfig{
 				SnortLogPath: "/var/log/snort/alert",
@@ -59,7 +59,7 @@ func main() {
 		nil,
 	)
 
-	protectManager, err := protection.NewProtectManager(
+	protectionManager, err := protection.NewProtectManager(
 		time.Duration(appConfig.Protection.ProtectionTTL),
 		time.Duration(appConfig.Protection.RefreshTick),
 		alertScanner,
@@ -68,10 +68,10 @@ func main() {
 		log.Fatalf("[ERROR] Failed to create protection manager: %v", err)
 	}
 
-	protectManager.Start()
+	protectionManager.Start()
 	log.Println("[INFO] Protection manager started")
 	defer func() {
-		protectManager.Stop()
+		protectionManager.Stop()
 		log.Println("[INFO] Protection manager stopped")
 	}()
 
@@ -104,7 +104,7 @@ func main() {
 	app.Use(api.RequestLogger())
 
 	apiGroup := app.Group("/api")
-	api.HandleRoutes(apiGroup)
+	api.HandleRoutes(apiGroup, appConfig, protectionManager)
 
 	apiGroup.Get(
 		"/",

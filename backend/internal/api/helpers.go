@@ -36,3 +36,10 @@ func RespondWithJSON(c *fiber.Ctx, code int, data interface{}) error {
 		Data:   data,
 	})
 }
+
+func RespondWithCustomMessage(c *fiber.Ctx, code int, message string) error {
+	return c.Status(code).JSON(StandardResponse{
+		Status:  "success",
+		Message: message,
+	})
+}
