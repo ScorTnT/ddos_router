@@ -41,6 +41,8 @@ import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
 import BlackList from './BlackList.jsx';
+import ApiGuide from './ApiGuide.jsx';
+
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -94,6 +96,7 @@ function Dashboard({ setIsLoggedIn }) {
                     <Tab icon={<SettingsIcon />} label="내부 네트워크 설정" />
                     <Tab icon={<SettingsIcon />} label="제한 목록" />
                     <Tab icon={<SettingsIcon />} label="관리자 설정" />
+                    <Tab icon={<SettingsIcon />} label="API 가이드" />
                 </Tabs>
             </AppBar>
 
@@ -103,6 +106,7 @@ function Dashboard({ setIsLoggedIn }) {
                 {currentTab === 2 && <IntranetConfig />}
                 {currentTab === 3 && <BlackList />}
                 {currentTab === 4 && <UserConfig />}
+                {currentTab === 4 && <ApiGuide />}
             </Box>
         </Box>
     );
