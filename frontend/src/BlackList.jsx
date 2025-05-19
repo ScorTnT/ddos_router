@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
     Button,
     Card,
@@ -13,7 +13,8 @@ import {
     Paper,
     Typography,
     Tooltip,
-    IconButton
+    IconButton,
+    TableRow
 } from "@mui/material";
 function BlackList(){
     const [blockedIP, setBlockedIP] = useState([]);
@@ -22,7 +23,7 @@ function BlackList(){
 
         }
     }, []);
-    return (
+    return <>
         <Stack spacing={3}>
             <Card>
                 <CardContent>
@@ -111,8 +112,7 @@ function BlackList(){
                 </CardContent>
             </Card>
         </Stack>
-    )
-};
+    </>
+}
 
 export default BlackList;
-

@@ -106,7 +106,7 @@ function Dashboard({ setIsLoggedIn }) {
                 {currentTab === 2 && <IntranetConfig />}
                 {currentTab === 3 && <BlackList />}
                 {currentTab === 4 && <UserConfig />}
-                {currentTab === 4 && <ApiGuide />}
+                {currentTab === 5 && <ApiGuide />}
             </Box>
         </Box>
     );
