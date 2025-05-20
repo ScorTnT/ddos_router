@@ -16,6 +16,7 @@ import {
     IconButton,
     TableRow
 } from "@mui/material";
+import { getProtectionLogs, blockIP, unblockIP } from './api/getProtectionLog';
 function BlackList(){
     const [blockedIP, setBlockedIP] = useState([]);
     useEffect(() => {
@@ -45,8 +46,8 @@ function BlackList(){
                             </TableHead>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell>     </TableCell>
-                                    <TableCell>     </TableCell>
+                                    <TableCell> api 답변에 따라 수정 예정 </TableCell>
+                                    <TableCell> api 답변에 따라 수정 예정 </TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
