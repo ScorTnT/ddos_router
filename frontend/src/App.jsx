@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import Login from "./Login.jsx";
 import Dashboard from "./Dashboard.jsx";
-import APIGuide from "./APIGuide.jsx";
+import APIGuide from "./ApiGuide.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

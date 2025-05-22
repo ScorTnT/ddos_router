@@ -16,13 +16,15 @@ import {
     IconButton,
     TableRow
 } from "@mui/material";
-import { getProtectionLogs, blockIP, unblockIP } from './api/getProtectionLog';
+import { getBlockedIP, blockIP, unblockIP } from './api/getBlockedIP';
 function BlackList(){
     const [blockedIP, setBlockedIP] = useState([]);
+    const [blackList, setBlackList] = useState([]);
+    const [whiteList, setWhiteList] = useState([]);
     useEffect(() => {
-        if(blockedIP){
+        // if(){
 
-        }
+        // }
     }, []);
     return <>
         <Stack spacing={3}>

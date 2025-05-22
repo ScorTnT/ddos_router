@@ -1,16 +1,16 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Protectioni Log 조회
-export async function getProtectionLogs() {
+export async function getBlockedIP() {
     try {
         const response = await fetch(`${API_URL}/protection`);
         if (!response.ok) {
-            throw new Error("Failed to fetch protection log");
+            throw new Error("Failed to fetch blocked IP");
         }
         const protectionLog = await response.json();
         return protectionLog;
     } catch (error) {
-        console.error("Error fetching protection logs:", error);
+        console.error("Error fetching blocked IP:", error);
         throw error;
     }
 }
