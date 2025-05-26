@@ -41,8 +41,7 @@ import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
 import BlackList from './BlackList.jsx';
-import ApiGuide from './ApiGuide.jsx';
-
+import APIGuide from './APIGuide.jsx';
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -68,7 +67,7 @@ function Dashboard({ setIsLoggedIn }) {
 
                 <Button
                     color="inherit"
-                    href="/api"
+                    onClick={() => setCurrentTab(5)}
                     sx={{
                         textDecoration: 'none',
                         color: 'inherit',
@@ -106,7 +105,7 @@ function Dashboard({ setIsLoggedIn }) {
                 {currentTab === 2 && <IntranetConfig />}
                 {currentTab === 3 && <BlackList />}
                 {currentTab === 4 && <UserConfig />}
-                {currentTab === 4 && <ApiGuide />}
+                {currentTab === 5 && <APIGuide />}
             </Box>
         </Box>
     );
