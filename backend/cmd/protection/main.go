@@ -35,8 +35,8 @@ func main() {
 				BufferSize:   1024,
 			},
 			Protection: internal.ProtectionConfig{
-				ProtectionTTL: 3600,
-				RefreshTick:   60,
+				ProtectionTTL: 30,
+				RefreshTick:   1000,
 			},
 		}
 	}
@@ -60,8 +60,8 @@ func main() {
 	)
 
 	protectionManager, err := protection.NewProtectManager(
-		time.Duration(appConfig.Protection.ProtectionTTL),
-		time.Duration(appConfig.Protection.RefreshTick),
+		time.Duration(appConfig.Protection.ProtectionTTL)*time.Second,
+		time.Duration(appConfig.Protection.RefreshTick)*time.Millisecond,
 		alertScanner,
 	)
 	if err != nil {

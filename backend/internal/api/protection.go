@@ -7,14 +7,13 @@ import (
 
 func GetProtection(protectionManager *protection.ProtectionManager) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		ip := c.Query("ip")
-		if ip == "" {
-			return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
+		blockedIP := protectionManager.SnapshotBlocks()
+
+		if len(blockedIP) == 0 {
+			return RespondWithError(c, fiber.StatusNotFound, "Blocked IP is Empty")
 		}
 
-		protectionManager.Add(ip)
-
-		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address added to firewall rules")
+		return RespondWithJSON(c, fiber.StatusOK, blockedIP)
 	}
 }
 
@@ -25,15 +24,21 @@ func PostIPBlock(protectionManager *protection.ProtectionManager) fiber.Handler 
 			return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
 		}
 
-		protectionManager.Delete(ip)
+		protectionManager.Add(ip)
 
-		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address deleted from firewall rules")
+		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address added from firewall rules")
 	}
 }
 
 func PostIPUnblock(protectionManager *protection.ProtectionManager) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		blockedIPs := protectionManager.SnapshotBlocks()
-		return RespondWithJSON(c, fiber.StatusOK, blockedIPs)
+		ip := c.Query("ip")
+		if ip == "" {
+			return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
+		}
+
+		protectionManager.Delete(ip)
+
+		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address deleted from firewall rules")
 	}
 }

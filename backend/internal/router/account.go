@@ -3,10 +3,9 @@ package router
 import (
 	"bufio"
 	"fmt"
+	"github.com/GehirnInc/crypt/sha256_crypt"
 	"os"
 	"strings"
-
-	"github.com/GehirnInc/crypt/md5_crypt"
 )
 
 func CheckAccount(username, password string) (bool, error) {
@@ -31,9 +30,9 @@ func CheckAccount(username, password string) (bool, error) {
 		}
 
 		hash := fields[1]
-		crypto := md5_crypt.New()
+		crypto := sha256_crypt.New()
 		err := crypto.Verify(hash, []byte(password))
-		result := (err == nil)
+		result := err == nil
 
 		return result, nil
 	}
