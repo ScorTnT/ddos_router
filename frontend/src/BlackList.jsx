@@ -27,7 +27,6 @@ function BlackList(){
     const [isAutoUpdate, setIsAutoUpdate] = useState(true);
     const [updateError, setUpdateError] = useState(null);
 
-    /*
     const fetchProtectionLog = async () => {
         try {
             const protectionData = await getBlockedIP();
@@ -52,27 +51,26 @@ function BlackList(){
 
     useEffect(() => {
         // if (!Array.isArray(protectionLog)) return;
+        const tempBlack = [...protectionLog];
         const tempBlocked = [];
-        const tempBlack = [];
         
-        protectionLog.forEach(pLog => {
-            const pLogIp = pLog.ip;
-            if (blackList.some(item => item.ip === pLogIp)) {
-                tempBlack.push();
-            } else if (whiteList.includes(ip)) {
-                tempWhite.push(ipObj);
-            } else {
-                tempBlocked.push(ipObj);
+        for (let i = tempBlack.length - 1; i >= 0; i--) {
+            const pLog = tempBlack[i];
+            const pLogIp = pLog.ip
+            if (!blackList.some(item => item.ip === pLogIp)) {
+                tempBlocked.push(pLog);
+                tempBlack.splice(i, 1);
             }
-        });
+        }
 
-        setBlockedIP(tempBlocked);
-        // setBlackList(tempBlack.map(i => i.ip)); // <- 필요하면
-        // setWhiteList(tempWhite.map(i => i.ip)); // <- 필요하면
-    }, [apiList, blackList, whiteList]);
+        setBlockedIP(tempBlocked.reverse());
+        setBlackList(tempBlack);
+    }, [protectionLog]);
+
+    useEffect(() => {
+
+    })
     
-    */
-
     return <>
         <Stack spacing={3}>
             <Card>
@@ -93,12 +91,24 @@ function BlackList(){
                                     <TableCell sx={{ fontWeight: 'bold' }}>차단된 시각</TableCell>
                                 </TableRow>
                             </TableHead>
+
                             <TableBody>
-                                <TableRow>
-                                    <TableCell> api 답변에 따라 수정 예정 </TableCell>
-                                    <TableCell> api 답변에 따라 수정 예정 </TableCell>
-                                </TableRow>
+                                {updateError ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center">
+                                            <Typography color="error" variant="body1">
+                                                {updateError}
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>                                    
+                                ) : blockedIP.map((pLog, index) => {
+                                    <TableRow key={index}>
+                                        <TableCell>{pLog.ip}</TableCell>
+                                        <TableCell>{formatTime(pLog.expire_at)}</TableCell>
+                                    </TableRow>
+                                })}
                             </TableBody>
+
                         </Table>
                     </TableContainer>
                 </CardContent>
@@ -119,14 +129,25 @@ function BlackList(){
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 'bold' }}>IP</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>추가된 시각</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>차단된 시각</TableCell>
                                 </TableRow>
                             </TableHead>
+
                             <TableBody>
-                                <TableRow>
-                                    <TableCell>     </TableCell>
-                                    <TableCell>     </TableCell>
-                                </TableRow>
+                                {blackList.length = 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center">
+                                            <Typography color="error" variant="body1">
+                                                차단된 IP가 존재하지 않습니다.
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>                                    
+                                ) : blackList.map((pLog, index) => {
+                                    <TableRow key={index}>
+                                        <TableCell>{pLog.ip}</TableCell>
+                                        <TableCell>{formatTime(pLog.expire_at)}</TableCell>
+                                    </TableRow>
+                                })}
                             </TableBody>
                         </Table>
                     </TableContainer>                    
@@ -151,11 +172,22 @@ function BlackList(){
                                     <TableCell sx={{ fontWeight: 'bold' }}>허용된 시각</TableCell>
                                 </TableRow>
                             </TableHead>
+
                             <TableBody>
-                                <TableRow>
-                                    <TableCell>     </TableCell>
-                                    <TableCell>     </TableCell>
-                                </TableRow>
+                                {whiteList.length = 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} align="center">
+                                            <Typography color="error" variant="body1">
+                                                허용된 IP가 존재하지 않습니다.
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>                                    
+                                ) : whiteList.map((pLog, index) => {
+                                    <TableRow key={index}>
+                                        <TableCell>{pLog.ip}</TableCell>
+                                        <TableCell>{formatTime(pLog.expire_at)}</TableCell>
+                                    </TableRow>
+                                })}
                             </TableBody>
                         </Table>
                     </TableContainer>                    

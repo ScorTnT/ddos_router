@@ -242,7 +242,7 @@ function InfoPanel() {
                                         <TableCell>{log.byte_count}</TableCell>
                                         </TableRow>
                                     );
-                                    })}
+                                })}
                             </TableBody>
 
                         </Table>
