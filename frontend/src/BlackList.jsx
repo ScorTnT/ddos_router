@@ -16,18 +16,25 @@ import {
     Typography,
     Tooltip,
     IconButton,
-    TableRow
+    TableRow,
+    Checkbox
 } from "@mui/material";
 import { getBlockedIP, blockIP, unblockIP } from './api/getBlockedIP';
 function BlackList(){
     const [protectionLog, setProtectionLog] = useState([]);
+    // 리스트 관리
     const [blockedIP, setBlockedIP] = useState([]);
     const [blackList, setBlackList] = useState([]);
     const [whiteList, setWhiteList] = useState([]);
+    // 선택된 리스트 관리
+    const [selectedBlockedIP, setSelectedBlockedIP] = useState([]);
+    const [selectedBlackList, setSelectedBlackList] = useState([]);
+    const [selectedWhiteList, setSelectedWhiteList] = useState([]);
+
     const [isAutoUpdate, setIsAutoUpdate] = useState(true);
     const [updateError, setUpdateError] = useState(null);
 
-    const fetchProtectionLog = async () => {
+    const FetchProtectionLog = async () => {
         try {
             const protectionData = await getBlockedIP();
             if (Array.isArray(protectionData)) setProtectionLog(protectionData);
@@ -38,46 +45,110 @@ function BlackList(){
             console.error('BlackList update error:', error);
         }
     };
-
+    // 토글 스위찌 체크박스
+    const CheckBlockedIP = (ip) => {
+        setSelectedBlockedIP((prev) =>
+            prev.includes(ip) ? prev.filter((item => item !== ip)) : [...prev, ip]
+        );
+    };
+    const CheckBlackList = (ip) => {
+        setSelectedBlackList((prev) =>
+            prev.includes(ip) ? prev.filter((item => item !== ip)) : [...prev, ip]
+        );
+    };
+    const CheckWhiteList = (ip) => {
+        setSelectedWhiteList((prev) =>
+            prev.includes(ip) ? prev.filter((item => item !== ip)) : [...prev, ip]
+        );
+    };
+    // 버튼
+    const ButtonBlock_White = () => {
+        const whiteIP = blockedIP.filter(item => selectedBlockedIP.includes(item.ip));
+        setWhiteList((prev) => [...prev, ...whiteIP])
+        setBlockedIP((prev) => prev.filter(item => !selectedBlockedIP.includes(item.ip)));
+        setSelectedBlockedIP([]);
+    };
+    const ButtonBlock_Black = () => {
+        const blackIP = blockedIP.filter(item => selectedBlockedIP.includes(item.ip));
+        setBlackList((prev) => [...prev, ...blackIP])
+        setBlockedIP((prev) => prev.filter(item => !selectedBlockedIP.includes(item.ip)));
+        setSelectedBlockedIP([]);
+    }
+    const ButtonBlack_White = () => {
+        const whiteIP = blackList.filter(item => selectedBlackList.includes(item.ip));
+        setWhiteList((prev) => [...prev, ...whiteIP])
+        setBlockedIP((prev) => prev.filter(item => !selectedBlackList.includes(item.ip)));
+        setSelectedBlackList([]);
+    }
+    const ButtonWhite_Black = () => {
+        const blackIP = whiteList.filter(item => selectedWhiteList.includes(item.ip));
+        setWhiteList((prev) => [...prev, ...whiteIP])
+        setBlockedIP((prev) => prev.filter(item => !selectedWhiteList.includes(item.ip)));
+        setSelectedWhiteList([]);
+    }
+    // fetch
     useEffect(() => {
-        fetchProtectionLog();
+        FetchProtectionLog();
     }, []);
-
+    // update
     useEffect(() => {
         if (!isAutoUpdate) return;
         const intervalId = setInterval(fetchProtectionLog, 5000);
         return () => clearInterval(intervalId);       
     }, [isAutoUpdate]);
-
+    // lists
     useEffect(() => {
-        // if (!Array.isArray(protectionLog)) return;
-        const tempBlack = [...protectionLog];
-        const tempBlocked = [];
-        
-        for (let i = tempBlack.length - 1; i >= 0; i--) {
-            const pLog = tempBlack[i];
-            const pLogIp = pLog.ip
-            if (!blackList.some(item => item.ip === pLogIp)) {
-                tempBlocked.push(pLog);
-                tempBlack.splice(i, 1);
-            }
+        // api 답변 오류
+        if (!Array.isArray(protectionLog)) return;
+        // blackList 빈 경우
+        if (blackList.length === 0) {
+            setBlockedIP(protectionLog);
+            return;
         }
-
-        setBlockedIP(tempBlocked.reverse());
-        setBlackList(tempBlack);
+        // 정상적인 경우 (새로 생긴 ip만만 BlockedIP 리스트에 추가)
+        const pLog = [...protectionLog];
+        const pastLogIp = [
+            ...blockedIP.map(item => item.ip),
+            ...blackList.map(item => item.ip),
+        ];
+        const newLog = pLog.filter(item => !pastLogIp.includes(item.ip));       
+        setBlockedIP(prev => [...prev, ...newLog]);
     }, [protectionLog]);
-
-    useEffect(() => {
-
-    })
     
     return <>
         <Stack spacing={3}>
             <Card>
                 <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                        차단 IP 목록 (Dropped IP)
-                    </Typography>
+                    <Box sx={{
+                        display : "flex",
+                        justifyContent : "space-between",
+                        alignItems : "center",
+                        mb : 2
+                    }}>
+                        <Typography variant="h6" gutterBottom>
+                            차단 IP 목록 (Dropped IP)
+                        </Typography>
+
+                        <Stack direction="row" spacing={2}>
+                            <Button 
+                                variant="contained" 
+                                color="success" 
+                                onClick={ButtonBlock_White}
+                                disabled={selectedBlockedIP.length===0}
+                            >
+                                허용
+                            </Button>
+                            <Button 
+                                variant="contained" 
+                                color="error" 
+                                onClick={ButtonBlock_Black}
+                                disabled={selectedBlockedIP.length===0}
+                            >
+                                차단
+                            </Button>
+                        </Stack>
+                    </Box>
+
                     <TableContainer 
                         component={Paper}
                         sx={{
@@ -102,7 +173,13 @@ function BlackList(){
                                         </TableCell>
                                     </TableRow>                                    
                                 ) : blockedIP.map((pLog, index) => {
-                                    <TableRow key={index}>
+                                    <TableRow key={index} selected={selectedBlockedIP.includes(pLog.ip)}>
+                                        <TableCell padding="checkbox">
+                                            <Checkbox
+                                                checked={selectedBlockedIP.includes(pLog.ip)}
+                                                onChange={() => CheckBlockedIP(pLog.ip)}
+                                            />
+                                        </TableCell>
                                         <TableCell>{pLog.ip}</TableCell>
                                         <TableCell>{formatTime(pLog.expire_at)}</TableCell>
                                     </TableRow>
@@ -116,9 +193,27 @@ function BlackList(){
 
             <Card>
                 <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                        영구 차단 IP 목록 (IP BlackList)
-                    </Typography>
+                    <Box sx={{
+                        display : "flex",
+                        justifyContent : "space-between",
+                        alignItems : "center",
+                        mb : 2
+                    }}>
+                        <Typography variant="h6" gutterBottom>
+                            영구 차단 IP 목록 (IP BlackList)
+                        </Typography>
+                        <Stack direction="row" spacing={2}>
+                            <Button 
+                                variant="contained" 
+                                color="success" 
+                                onClick={ButtonBlack_White}
+                                disabled={selectedBlackList.length===0}
+                            >
+                                허용
+                            </Button>
+                        </Stack>
+                    </Box>
+
                     <TableContainer 
                         component={Paper}
                         sx={{
@@ -143,7 +238,13 @@ function BlackList(){
                                         </TableCell>
                                     </TableRow>                                    
                                 ) : blackList.map((pLog, index) => {
-                                    <TableRow key={index}>
+                                    <TableRow key={index} selected={selectedBlackList.includes(pLog.ip)}>
+                                        <Tablecell padding="checkbox">
+                                            <Checkbox
+                                                checked={selectedBlackList.includes(pLog.ip)}
+                                                onChange={() => CheckBlackList(pLog.ip)}
+                                            />
+                                        </Tablecell>
                                         <TableCell>{pLog.ip}</TableCell>
                                         <TableCell>{formatTime(pLog.expire_at)}</TableCell>
                                     </TableRow>
@@ -156,9 +257,27 @@ function BlackList(){
 
             <Card>
                 <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                        허용 IP 목록 (IP WhiteList)
-                    </Typography>
+                    <Box sx={{
+                        display : "flex",
+                        justifyContent : "space-between",
+                        alignItems : "center",
+                        mb : 2
+                    }}>
+                        <Typography variant="h6" gutterBottom>
+                            허용 IP 목록 (IP WhiteList)
+                        </Typography>
+                        <Stack direction="row" spacing={2}>
+                            <Button 
+                                variant="contained" 
+                                color="success" 
+                                onClick={ButtonWhite_Black}
+                                disabled={selectedWhiteList.length===0}
+                            >
+                                차단
+                            </Button>
+                        </Stack>
+                    </Box>
+
                     <TableContainer 
                         component={Paper}
                         sx={{
@@ -169,7 +288,7 @@ function BlackList(){
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 'bold' }}>IP</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>허용된 시각</TableCell>
+                                    {/*<TableCell sx={{ fontWeight: 'bold' }}>허용된 시각</TableCell>*/}
                                 </TableRow>
                             </TableHead>
 
@@ -184,8 +303,14 @@ function BlackList(){
                                     </TableRow>                                    
                                 ) : whiteList.map((pLog, index) => {
                                     <TableRow key={index}>
+                                        <TableCell padding="checkbox">
+                                            <Checkbox
+                                                checked={selectedWhiteList.includes(pLog.ip)}
+                                                onChange={() => CheckWhiteList(pLog.ip)}
+                                            />
+                                        </TableCell>
                                         <TableCell>{pLog.ip}</TableCell>
-                                        <TableCell>{formatTime(pLog.expire_at)}</TableCell>
+                                        {/*<TableCell>{formatTime(pLog.expire_at)}</TableCell>*/}
                                     </TableRow>
                                 })}
                             </TableBody>
