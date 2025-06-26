@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetProtection(protectionManager *protection.ProtectionManager) fiber.Handler {
+func GetProtection(protectionManager *protection.Manager) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		blockedIP := protectionManager.SnapshotBlocks()
 
@@ -17,7 +17,7 @@ func GetProtection(protectionManager *protection.ProtectionManager) fiber.Handle
 	}
 }
 
-func PostIPBlock(protectionManager *protection.ProtectionManager) fiber.Handler {
+func PostIPBlock(protectionManager *protection.Manager) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ip := c.Query("ip")
 		if ip == "" {
@@ -30,7 +30,7 @@ func PostIPBlock(protectionManager *protection.ProtectionManager) fiber.Handler 
 	}
 }
 
-func PostIPUnblock(protectionManager *protection.ProtectionManager) fiber.Handler {
+func PostIPUnblock(protectionManager *protection.Manager) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ip := c.Query("ip")
 		if ip == "" {

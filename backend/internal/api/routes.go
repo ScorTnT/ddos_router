@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func HandleRoutes(apiGroup fiber.Router, appConfig *internal.Config, protectionManager *protection.ProtectionManager) {
+func HandleRoutes(apiGroup fiber.Router, appConfig *internal.Config, protectionManager *protection.Manager) {
 	infoGroup := apiGroup.Group("/information")
 	infoGroup.Use(ValidateSessionMiddleware)
 	infoGroup.Get("/neighbors", GetNeighbors)

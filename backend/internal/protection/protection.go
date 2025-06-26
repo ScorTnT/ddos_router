@@ -16,16 +16,20 @@ type AlertScanner interface {
 	GetChannel() <-chan string
 }
 
-type ProtectionManager struct {
-	ttl           time.Duration
-	blocksMu      sync.RWMutex
-	blocks        map[string]time.Time
-	addChannel    chan string
-	deleteChannel chan string
-	refreshTick   time.Duration
-	alertScanner  AlertScanner
-	ctx           context.Context
-	cancel        context.CancelFunc
+type Manager struct {
+	ttl                    time.Duration
+	blocksMu               sync.RWMutex
+	blocks                 map[string]time.Time
+	whitelistMu            sync.RWMutex
+	whitelist              map[string]struct{}
+	addChannel             chan string
+	deleteChannel          chan string
+	addWhitelistChannel    chan string
+	deleteWhitelistChannel chan string
+	refreshTick            time.Duration
+	alertScanner           AlertScanner
+	ctx                    context.Context
+	cancel                 context.CancelFunc
 }
 
 type BlockedIP struct {
@@ -34,7 +38,7 @@ type BlockedIP struct {
 	OriginalTTL time.Duration `json:"original_ttl"`
 }
 
-func NewProtectManager(ttl time.Duration, refreshTick time.Duration, alertScanner AlertScanner) (*ProtectionManager, error) {
+func NewProtectManager(ttl time.Duration, refreshTick time.Duration, alertScanner AlertScanner) (*Manager, error) {
 	if refreshTick <= 0 {
 		refreshTick = 10 * time.Second
 	}
@@ -49,28 +53,37 @@ func NewProtectManager(ttl time.Duration, refreshTick time.Duration, alertScanne
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	protectManager := &ProtectionManager{
-		ttl:           ttl,
-		blocks:        make(map[string]time.Time),
-		addChannel:    make(chan string, 1024),
-		deleteChannel: make(chan string, 1024),
-		refreshTick:   refreshTick,
-		alertScanner:  alertScanner,
-		ctx:           ctx,
-		cancel:        cancel,
+	protectManager := &Manager{
+		ttl:                    ttl,
+		blocks:                 make(map[string]time.Time),
+		addChannel:             make(chan string, 1024),
+		deleteChannel:          make(chan string, 1024),
+		whitelist:              make(map[string]struct{}),
+		addWhitelistChannel:    make(chan string, 1024),
+		deleteWhitelistChannel: make(chan string, 1024),
+		refreshTick:            refreshTick,
+		alertScanner:           alertScanner,
+		ctx:                    ctx,
+		cancel:                 cancel,
 	}
 
 	return protectManager, nil
 }
 
-func (m *ProtectionManager) handleScan(ip string) {
+func (m *Manager) handleScan(ip string) {
 	m.blocksMu.Lock()
+	m.whitelistMu.Lock()
 	defer m.blocksMu.Unlock()
+	defer m.whitelistMu.Unlock()
 
 	now := time.Now()
 	expireTime := now.Add(m.ttl)
 
 	if _, exists := m.blocks[ip]; exists {
+		return
+	}
+
+	if _, exists := m.whitelist[ip]; exists {
 		return
 	}
 
@@ -84,7 +97,7 @@ func (m *ProtectionManager) handleScan(ip string) {
 	m.blocks[ip] = expireTime
 }
 
-func (m *ProtectionManager) handleExpiredBlock() {
+func (m *Manager) handleExpiredBlock() {
 	m.blocksMu.Lock()
 	defer m.blocksMu.Unlock()
 
@@ -102,7 +115,7 @@ func (m *ProtectionManager) handleExpiredBlock() {
 	}
 }
 
-func (m *ProtectionManager) handleDelete(ip string) {
+func (m *Manager) handleDelete(ip string) {
 	m.blocksMu.Lock()
 	defer m.blocksMu.Unlock()
 
@@ -121,7 +134,44 @@ func (m *ProtectionManager) handleDelete(ip string) {
 	log.Printf("[ProtectManager] Unblocked %s (manual, original-ttl %s)", ip, expireTime.Format(time.RFC3339))
 }
 
-func (m *ProtectionManager) cleanupAll() {
+func (m *Manager) handleAddWhitelist(ip string) {
+	m.blocksMu.Lock()
+	m.whitelistMu.Lock()
+	defer m.whitelistMu.Unlock()
+	defer m.blocksMu.Unlock()
+
+	if _, exists := m.whitelist[ip]; !exists {
+		m.whitelist[ip] = struct{}{}
+		log.Printf("[ProtectManager] Add %s to whitelist", ip)
+	}
+
+	if expireTime, exists := m.blocks[ip]; exists {
+		if err := firewall.UnblockIP(ip); err != nil {
+			log.Printf("[ProtectManager] Unblock IP (%s) on whitelist add error: %v", ip, err)
+			return
+		}
+		delete(m.blocks, ip)
+		log.Printf("[ProtectManager] Unblocked %s (added to whitelist, original-ttl %s)", ip, expireTime.Format(time.RFC3339))
+	}
+
+	m.whitelist[ip] = struct{}{}
+	log.Printf("[ProtectManager] Add %s to whitelist", ip)
+	return
+}
+
+func (m *Manager) handleDeleteWhitelist(ip string) {
+	m.whitelistMu.Lock()
+	defer m.whitelistMu.Unlock()
+
+	if _, exists := m.whitelist[ip]; !exists {
+		return
+	}
+
+	delete(m.whitelist, ip)
+	log.Printf("[ProtectManager] Delete %s from whitelist", ip)
+}
+
+func (m *Manager) cleanupAll() {
 	m.blocksMu.Lock()
 	defer m.blocksMu.Unlock()
 
@@ -137,7 +187,7 @@ func (m *ProtectionManager) cleanupAll() {
 	m.blocks = make(map[string]time.Time)
 }
 
-func (m *ProtectionManager) Add(ip string) {
+func (m *Manager) Add(ip string) {
 	if ip == "" {
 
 		return
@@ -150,7 +200,7 @@ func (m *ProtectionManager) Add(ip string) {
 	}
 }
 
-func (m *ProtectionManager) Delete(ip string) {
+func (m *Manager) Delete(ip string) {
 	if ip == "" {
 		return
 	}
@@ -158,11 +208,35 @@ func (m *ProtectionManager) Delete(ip string) {
 	select {
 	case m.deleteChannel <- ip:
 	default:
-		log.Printf("[ProtectManager] Drop IP %s : Channel Full", ip)
+		log.Printf("[ProtectManager] UnDrop IP %s : Channel Full", ip)
 	}
 }
 
-func (m *ProtectionManager) SnapshotBlocks() []BlockedIP {
+func (m *Manager) AddWhitelist(ip string) {
+	if ip == "" {
+		return
+	}
+
+	select {
+	case m.addWhitelistChannel <- ip:
+	default:
+		log.Printf("[ProtectManager] Add Ip to Whitelist %s : Channel Full", ip)
+	}
+}
+
+func (m *Manager) DeleteWhitelist(ip string) {
+	if ip == "" {
+		return
+	}
+
+	select {
+	case m.deleteWhitelistChannel <- ip:
+	default:
+		log.Printf("[ProtectManager] Delete Ip from Whitelist %s : Channel Full", ip)
+	}
+}
+
+func (m *Manager) SnapshotBlocks() []BlockedIP {
 	m.blocksMu.RLock()
 	defer m.blocksMu.RUnlock()
 
@@ -178,7 +252,19 @@ func (m *ProtectionManager) SnapshotBlocks() []BlockedIP {
 	return snapshot
 }
 
-func (m *ProtectionManager) Run(ctx context.Context) {
+func (m *Manager) SnapshotWhitelist() []string {
+	m.whitelistMu.RLock()
+	defer m.whitelistMu.RUnlock()
+
+	snapshot := make([]string, 0, len(m.whitelist))
+	for ip := range m.whitelist {
+		snapshot = append(snapshot, ip)
+	}
+
+	return snapshot
+}
+
+func (m *Manager) Run(ctx context.Context) {
 	readChannel := (<-chan string)(nil)
 	readChannel = m.alertScanner.GetChannel()
 
@@ -196,13 +282,17 @@ func (m *ProtectionManager) Run(ctx context.Context) {
 			m.handleDelete(ip)
 		case ip := <-readChannel:
 			m.handleScan(ip)
+		case ip := <-m.addWhitelistChannel:
+			m.handleAddWhitelist(ip)
+		case ip := <-m.deleteWhitelistChannel:
+			m.handleDeleteWhitelist(ip)
 		case <-ticker.C:
 			m.handleExpiredBlock()
 		}
 	}
 }
 
-func (m *ProtectionManager) Start() {
+func (m *Manager) Start() {
 	m.alertScanner.StartScan()
 
 	if m.ctx != nil {
@@ -211,7 +301,7 @@ func (m *ProtectionManager) Start() {
 	}
 }
 
-func (m *ProtectionManager) Stop() {
+func (m *Manager) Stop() {
 	m.alertScanner.StopScan()
 
 	if m.cancel != nil {
