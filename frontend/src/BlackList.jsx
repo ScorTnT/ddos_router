@@ -18,7 +18,9 @@ import {
     TableRow,
     Checkbox
 } from "@mui/material";
-import { getBlockedIP, blockIP, unblockIP } from './api/getBlockedIP';
+//import { getBlockedIP, blockIP, unblockIP } from './api/getBlockedIP';
+import ProtectionAPI from './api_new/protection';
+const protectionAPI = new ProtectionAPI();
 function BlackList(){
     const [protectionLog, setProtectionLog] = useState([]);
     // 리스트 관리
@@ -61,29 +63,62 @@ function BlackList(){
         );
     };
     // 버튼
-    const ButtonBlock_White = () => {
-        const whiteIP = blockedIP.filter(item => selectedBlockedIP.includes(item.ip));
-        setWhiteList((prev) => [...prev, ...whiteIP])
-        setBlockedIP((prev) => prev.filter(item => !selectedBlockedIP.includes(item.ip)));
-        setSelectedBlockedIP([]);
+    const ButtonBlock_White = async () => {
+        try {
+            const whiteIP = blockedIP.filter(item => selectedBlockedIP.includes(item.ip));
+            for (const ipObj of whiteIP) {
+                await protectionAPI.unblockIP(ipObj.ip);
+            }
+            setWhiteList((prev) => [...prev, ...whiteIP]);
+            setBlockedIP((prev) => prev.filter(item => !selectedBlockedIP.includes(item.ip)));
+            setSelectedBlockedIP([]);
+        } catch (error) {
+            console.error('IP 허용 오류', error);
+            alert('IP 허용 중 오류가 발생했습니다.');
+        }
     };
-    const ButtonBlock_Black = () => {
-        const blackIP = blockedIP.filter(item => selectedBlockedIP.includes(item.ip));
-        setBlackList((prev) => [...prev, ...blackIP])
-        setBlockedIP((prev) => prev.filter(item => !selectedBlockedIP.includes(item.ip)));
-        setSelectedBlockedIP([]);
-    }
-    const ButtonBlack_White = () => {
-        const whiteIP = blackList.filter(item => selectedBlackList.includes(item.ip));
-        setWhiteList((prev) => [...prev, ...whiteIP])
-        setBlockedIP((prev) => prev.filter(item => !selectedBlackList.includes(item.ip)));
-        setSelectedBlackList([]);
-    }
-    const ButtonWhite_Black = () => {
-        const blackIP = whiteList.filter(item => selectedWhiteList.includes(item.ip));
-        setWhiteList((prev) => [...prev, ...whiteIP])
-        setBlockedIP((prev) => prev.filter(item => !selectedWhiteList.includes(item.ip)));
-        setSelectedWhiteList([]);
+    const ButtonBlock_Black = async () => {
+        try {
+            const blackIP = blockedIP.filter(item => selectedBlockedIP.includes(item.ip));
+            for (const ipObj of blackIP) {
+                await protectionAPI.blockIP(ipObj.ip);
+            }
+            setBlackList((prev) => [...prev, ...blackIP])
+            setBlockedIP((prev) => prev.filter(item => !selectedBlockedIP.includes(item.ip)));
+            setSelectedBlockedIP([]);
+        } catch (error) {
+            console.error('IP 차단 오류', error);
+            alert('IP  차단 중 오류가 발생했습니다.');
+        }
+    };
+    const ButtonBlack_White = async () => {
+        try {
+            const whiteIP = blackList.filter(item => selectedBlackList.includes(item.ip));
+            for (const ipObj of whiteIP) {
+                await protectionAPI.unblockIP(ipObj.ip);
+            }
+            setWhiteList((prev) => [...prev, ...whiteIP])
+            setBlockedIP((prev) => prev.filter(item => !selectedBlackList.includes(item.ip)));
+            setSelectedBlackList([]);
+        } catch (error) {
+            console.error('IP 허용 오류', error);
+            alert('IP 허용 중 오류가 발생했습니다.');            
+        }
+    };
+    const ButtonWhite_Black = async () => {
+        try {
+            const blackIP = whiteList.filter(item => selectedWhiteList.includes(item.ip));
+            for (const ipObj of blackIP) {
+                await protectionAPI.blockIP(ipObj.ip);
+            }
+            setBlackList((prev) => [...prev, ...blackIP])
+            setBlockedIP((prev) => prev.filter(item => !selectedWhiteList.includes(item.ip)));
+            setSelectedWhiteList([]);
+        } catch (error) {
+            console.error('IP 차단 오류', error);
+            alert('IP  차단 중 오류가 발생했습니다.');            
+        }
+
     }
     // fetch
     useEffect(() => {
@@ -92,7 +127,7 @@ function BlackList(){
     // update
     useEffect(() => {
         if (!isAutoUpdate) return;
-        const intervalId = setInterval(fetchProtectionLog, 5000);
+        const intervalId = setInterval(FetchProtectionLog, 5000);
         return () => clearInterval(intervalId);       
     }, [isAutoUpdate]);
     // lists
@@ -104,7 +139,7 @@ function BlackList(){
             setBlockedIP(protectionLog);
             return;
         }
-        // 정상적인 경우 (새로 생긴 ip만만 BlockedIP 리스트에 추가)
+        // 정상적인 경우 (새로 생긴 ip만 BlockedIP 리스트에 추가)
         const pLog = [...protectionLog];
         const pastLogIp = [
             ...blockedIP.map(item => item.ip),
@@ -171,7 +206,7 @@ function BlackList(){
                                             </Typography>
                                         </TableCell>
                                     </TableRow>                                    
-                                ) : blockedIP.map((pLog, index) => {
+                                ) : blockedIP.map((pLog, index) => (
                                     <TableRow key={index} selected={selectedBlockedIP.includes(pLog.ip)}>
                                         <TableCell padding="checkbox">
                                             <Checkbox
@@ -182,7 +217,7 @@ function BlackList(){
                                         <TableCell>{pLog.ip}</TableCell>
                                         <TableCell>{formatTime(pLog.expire_at)}</TableCell>
                                     </TableRow>
-                                })}
+                                ))}
                             </TableBody>
 
                         </Table>
@@ -228,7 +263,7 @@ function BlackList(){
                             </TableHead>
 
                             <TableBody>
-                                {blackList.length = 0 ? (
+                                {blackList.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={7} align="center">
                                             <Typography color="error" variant="body1">
@@ -236,18 +271,18 @@ function BlackList(){
                                             </Typography>
                                         </TableCell>
                                     </TableRow>                                    
-                                ) : blackList.map((pLog, index) => {
+                                ) : blackList.map((pLog, index) => (
                                     <TableRow key={index} selected={selectedBlackList.includes(pLog.ip)}>
-                                        <Tablecell padding="checkbox">
+                                        <TableCell padding="checkbox">
                                             <Checkbox
                                                 checked={selectedBlackList.includes(pLog.ip)}
                                                 onChange={() => CheckBlackList(pLog.ip)}
                                             />
-                                        </Tablecell>
+                                        </TableCell>
                                         <TableCell>{pLog.ip}</TableCell>
                                         <TableCell>{formatTime(pLog.expire_at)}</TableCell>
                                     </TableRow>
-                                })}
+                                ))}
                             </TableBody>
                         </Table>
                     </TableContainer>                    
@@ -292,7 +327,7 @@ function BlackList(){
                             </TableHead>
 
                             <TableBody>
-                                {whiteList.length = 0 ? (
+                                {whiteList.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={7} align="center">
                                             <Typography color="error" variant="body1">
@@ -300,7 +335,7 @@ function BlackList(){
                                             </Typography>
                                         </TableCell>
                                     </TableRow>                                    
-                                ) : whiteList.map((pLog, index) => {
+                                ) : whiteList.map((pLog, index) => (
                                     <TableRow key={index}>
                                         <TableCell padding="checkbox">
                                             <Checkbox
@@ -311,7 +346,7 @@ function BlackList(){
                                         <TableCell>{pLog.ip}</TableCell>
                                         {/*<TableCell>{formatTime(pLog.expire_at)}</TableCell>*/}
                                     </TableRow>
-                                })}
+                                ))}
                             </TableBody>
                         </Table>
                     </TableContainer>                    
