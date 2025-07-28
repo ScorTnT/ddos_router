@@ -8,8 +8,8 @@ import (
 )
 
 type LANConfig struct {
-	IPAddress string
-	Netmask   string
+	IPAddress string `json:"ip_address"`
+	Netmask   string `json:"netmask"`
 }
 
 func NewLANConfig() *LANConfig {
