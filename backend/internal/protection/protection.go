@@ -1,13 +1,15 @@
 package protection
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"sync"
-	"time"
+    "context"
+    "fmt"
+    "log"
+    "net"
+    "strings"
+    "sync"
+    "time"
 
-	"github.com/ScorTnT/ddos_router/backend/internal/firewall"
+    "github.com/ScorTnT/ddos_router/backend/internal/firewall"
 )
 
 type AlertScanner interface {
@@ -70,11 +72,33 @@ func NewProtectManager(ttl time.Duration, refreshTick time.Duration, alertScanne
 	return protectManager, nil
 }
 
+func normalizeIP(ip string) (string, bool) {
+    if ip == "" {
+        return "", false
+    }
+
+    ip = strings.TrimSpace(ip)
+    parsed := net.ParseIP(ip)
+    if parsed == nil {
+        return "", false
+    }
+    // Canonical string form (handles IPv6 normalization as well)
+    return parsed.String(), true
+}
+
 func (m *Manager) handleScan(ip string) {
-	m.blocksMu.Lock()
-	m.whitelistMu.Lock()
-	defer m.blocksMu.Unlock()
-	defer m.whitelistMu.Unlock()
+    // Normalize incoming IP (covers Snort events and API enqueued adds)
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on add: %q", ip)
+        return
+    }
+
+    m.blocksMu.Lock()
+    m.whitelistMu.Lock()
+    defer m.blocksMu.Unlock()
+    defer m.whitelistMu.Unlock()
 
 	now := time.Now()
 	expireTime := now.Add(m.ttl)
@@ -87,12 +111,28 @@ func (m *Manager) handleScan(ip string) {
 		return
 	}
 
-	if err := firewall.BlockIP(ip); err != nil {
-		log.Printf("[ProtectManager] Block IP (%s) error: %v", ip, err)
-		return
-	}
-
-	log.Printf("[ProtectManager] Blocked %s until %s", ip, expireTime.Format(time.RFC3339))
+    if err := firewall.BlockIP(ip); err != nil {
+        // Idempotent: if it's already present in nft set, accept and proceed
+        if list, gerr := firewall.GetBlockedIPs(); gerr == nil {
+            found := false
+            for _, e := range list {
+                if e == ip {
+                    found = true
+                    break
+                }
+            }
+            if !found {
+                log.Printf("[ProtectManager] Block IP (%s) error: %v", ip, err)
+                return
+            }
+            log.Printf("[ProtectManager] IP %s already present in firewall; syncing state", ip)
+        } else {
+            log.Printf("[ProtectManager] Block IP (%s) error and failed to verify state: %v", ip, err)
+            return
+        }
+    } else {
+        log.Printf("[ProtectManager] Blocked %s until %s", ip, expireTime.Format(time.RFC3339))
+    }
 
 	m.blocks[ip] = expireTime
 }
@@ -116,8 +156,16 @@ func (m *Manager) handleExpiredBlock() {
 }
 
 func (m *Manager) handleDelete(ip string) {
-	m.blocksMu.Lock()
-	defer m.blocksMu.Unlock()
+    // Normalize to match stored keys
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on delete: %q", ip)
+        return
+    }
+
+    m.blocksMu.Lock()
+    defer m.blocksMu.Unlock()
 
 	expireTime, exists := m.blocks[ip]
 
@@ -135,10 +183,17 @@ func (m *Manager) handleDelete(ip string) {
 }
 
 func (m *Manager) handleAddWhitelist(ip string) {
-	m.blocksMu.Lock()
-	m.whitelistMu.Lock()
-	defer m.whitelistMu.Unlock()
-	defer m.blocksMu.Unlock()
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on whitelist add: %q", ip)
+        return
+    }
+
+    m.blocksMu.Lock()
+    m.whitelistMu.Lock()
+    defer m.whitelistMu.Unlock()
+    defer m.blocksMu.Unlock()
 
 	if _, exists := m.whitelist[ip]; !exists {
 		m.whitelist[ip] = struct{}{}
@@ -156,12 +211,18 @@ func (m *Manager) handleAddWhitelist(ip string) {
 
 	m.whitelist[ip] = struct{}{}
 	log.Printf("[ProtectManager] Add %s to whitelist", ip)
-	return
 }
 
 func (m *Manager) handleDeleteWhitelist(ip string) {
-	m.whitelistMu.Lock()
-	defer m.whitelistMu.Unlock()
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on whitelist delete: %q", ip)
+        return
+    }
+
+    m.whitelistMu.Lock()
+    defer m.whitelistMu.Unlock()
 
 	if _, exists := m.whitelist[ip]; !exists {
 		return
@@ -188,52 +249,63 @@ func (m *Manager) cleanupAll() {
 }
 
 func (m *Manager) Add(ip string) {
-	if ip == "" {
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on add enqueue: %q", ip)
+        return
+    }
 
-		return
-	}
-
-	select {
-	case m.addChannel <- ip:
-	default:
-		log.Printf("[ProtectManager] Drop IP %s : Channel Full", ip)
-	}
+    select {
+    case m.addChannel <- ip:
+    default:
+        log.Printf("[ProtectManager] Drop IP %s : Channel Full", ip)
+    }
 }
 
 func (m *Manager) Delete(ip string) {
-	if ip == "" {
-		return
-	}
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on delete enqueue: %q", ip)
+        return
+    }
 
-	select {
-	case m.deleteChannel <- ip:
-	default:
-		log.Printf("[ProtectManager] UnDrop IP %s : Channel Full", ip)
-	}
+    select {
+    case m.deleteChannel <- ip:
+    default:
+        log.Printf("[ProtectManager] UnDrop IP %s : Channel Full", ip)
+    }
 }
 
 func (m *Manager) AddWhitelist(ip string) {
-	if ip == "" {
-		return
-	}
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on whitelist add enqueue: %q", ip)
+        return
+    }
 
-	select {
-	case m.addWhitelistChannel <- ip:
-	default:
-		log.Printf("[ProtectManager] Add Ip to Whitelist %s : Channel Full", ip)
-	}
+    select {
+    case m.addWhitelistChannel <- ip:
+    default:
+        log.Printf("[ProtectManager] Add Ip to Whitelist %s : Channel Full", ip)
+    }
 }
 
 func (m *Manager) DeleteWhitelist(ip string) {
-	if ip == "" {
-		return
-	}
+    if nIP, ok := normalizeIP(ip); ok {
+        ip = nIP
+    } else {
+        log.Printf("[ProtectManager] Ignore invalid IP on whitelist delete enqueue: %q", ip)
+        return
+    }
 
-	select {
-	case m.deleteWhitelistChannel <- ip:
-	default:
-		log.Printf("[ProtectManager] Delete Ip from Whitelist %s : Channel Full", ip)
-	}
+    select {
+    case m.deleteWhitelistChannel <- ip:
+    default:
+        log.Printf("[ProtectManager] Delete Ip from Whitelist %s : Channel Full", ip)
+    }
 }
 
 func (m *Manager) SnapshotBlocks() []BlockedIP {
@@ -293,12 +365,14 @@ func (m *Manager) Run(ctx context.Context) {
 }
 
 func (m *Manager) Start() {
-	m.alertScanner.StartScan()
+    m.alertScanner.StartScan()
 
-	if m.ctx != nil {
-		log.Println("[ProtectManager] Start scanning")
-		go m.Run(m.ctx)
-	}
+    if m.ctx != nil {
+        // Sync current firewall state into memory before starting event loop
+        m.syncFromFirewall()
+        log.Println("[ProtectManager] Start scanning")
+        go m.Run(m.ctx)
+    }
 }
 
 func (m *Manager) Stop() {
@@ -308,4 +382,46 @@ func (m *Manager) Stop() {
 		log.Println("[ProtectManager] Stop scanning")
 		m.cancel()
 	}
+}
+
+func (m *Manager) syncFromFirewall() {
+    list, err := firewall.GetBlockedIPs()
+    if err != nil {
+        log.Printf("[ProtectManager] Failed to sync from firewall: %v", err)
+        return
+    }
+
+    if len(list) == 0 {
+        return
+    }
+
+    now := time.Now()
+    expire := now.Add(m.ttl)
+
+    m.blocksMu.Lock()
+    m.whitelistMu.Lock()
+    defer m.whitelistMu.Unlock()
+    defer m.blocksMu.Unlock()
+
+    count := 0
+    for _, ip := range list {
+        if n, ok := normalizeIP(ip); ok {
+            ip = n
+        } else {
+            continue
+        }
+
+        if _, w := m.whitelist[ip]; w {
+            continue
+        }
+        if _, ex := m.blocks[ip]; ex {
+            continue
+        }
+        m.blocks[ip] = expire
+        count++
+    }
+
+    if count > 0 {
+        log.Printf("[ProtectManager] Synced %d IP(s) from firewall", count)
+    }
 }
