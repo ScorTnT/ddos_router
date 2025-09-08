@@ -35,13 +35,13 @@ import {
     Speed as SpeedIcon
 } from '@mui/icons-material';
 import PropTypes from "prop-types";
-import { getConnections } from './api/getConnections';
-import { getRouterInfo } from './api/getRouterInfo';
+import apiClient from './api_new/index.js';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
 import BlackList from './BlackList.jsx';
 import APIGuide from './APIGuide.jsx';
+
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -122,8 +122,8 @@ function InfoPanel() {
     const fetchRouterInfo = async () => {
         try {
             const [routerData, connectionsData] = await Promise.all([
-                getRouterInfo(),
-                getConnections()
+                apiClient.information.getRouterInfo(),
+                apiClient.information.getConnections()
             ]);
             if (routerData) {
                 setRouterInfo(routerData);
@@ -214,13 +214,6 @@ function InfoPanel() {
                                     </TableRow>
                                 ) : connectionLog.map((log, index) => {
                                     
-                                    // const key = `${log.protocol}${log.source_ip}${log.dest_ip}${log.source_port}`;
-                                    // // prev -> next 형태를 명시적으로 반환
-                                    // setLogIndex(prev => ({
-                                    // ...prev,
-                                    // [key]: prev[key] !== undefined ? `${prev[key]},${index}` : `${index}`,
-                                    // }));
-
                                     return log.source_ip === log.dest_ip ? null : (
                                         <TableRow key={index}>
                                         <TableCell>{log.protocol}</TableCell>

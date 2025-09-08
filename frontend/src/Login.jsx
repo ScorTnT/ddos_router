@@ -13,7 +13,8 @@ import {
 } from '@mui/material';
 import {Lock, Person, Visibility, VisibilityOff} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import { attemptLogin } from './api/checkAccount';
+import AuthAPI from './api/AuthAPI';
+const authApi = new AuthAPI();
 
 const Login = ({setIsLoggedIn}) => {
     const [formData, setFormData] = useState({
@@ -38,15 +39,24 @@ const Login = ({setIsLoggedIn}) => {
         setIsLoading(true);
         setError('');
 
+        // try {
+        //     const loginSuccess = await attemptLogin(formData.username, formData.password);
+        //     if (loginSuccess) {
+        //         setIsLoggedIn(true);
+        //     } else {
+        //         setError('아이디 또는 비밀번호가 올바르지 않습니다.');
+        //     }
+        // } catch (err) {
+        //     setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+        //     console.error('Login error:', err);
+        // } finally {
+        //     setIsLoading(false);
+        // }
         try {
-            const loginSuccess = await attemptLogin(formData.username, formData.password);
-            if (loginSuccess) {
-                setIsLoggedIn(true);
-            } else {
-                setError('아이디 또는 비밀번호가 올바르지 않습니다.');
-            }
+            await authApi.login(formData.username, formData.password);
+            setIsLoggedIn(true);
         } catch (err) {
-            setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+            setError('아이디 또는 비밀번호가 올바르지 않습니다.');
             console.error('Login error:', err);
         } finally {
             setIsLoading(false);

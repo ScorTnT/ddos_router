@@ -11,7 +11,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useState } from "react";
-// 1) 버전·메뉴별 JSX를 한곳에 모아둡니다.
+
 const MenuMap = {
   "1.0": {
     "시작하기" : (

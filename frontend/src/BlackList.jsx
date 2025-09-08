@@ -18,7 +18,7 @@ import {
     TableRow,
     Checkbox
 } from "@mui/material";
-//import { getBlockedIP, blockIP, unblockIP } from './api/getBlockedIP';
+
 import ProtectionAPI from './api_new/protection';
 const protectionAPI = new ProtectionAPI();
 function BlackList(){
