@@ -13,8 +13,7 @@ import {
 } from '@mui/material';
 import {Lock, Person, Visibility, VisibilityOff} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import AuthAPI from './api/AuthAPI';
-const authApi = new AuthAPI();
+import apiClient from './api_new';
 
 const Login = ({setIsLoggedIn}) => {
     const [formData, setFormData] = useState({
@@ -53,7 +52,7 @@ const Login = ({setIsLoggedIn}) => {
         //     setIsLoading(false);
         // }
         try {
-            await authApi.login(formData.username, formData.password);
+            await apiClient.auth.login(formData.username, formData.password);
             setIsLoggedIn(true);
         } catch (err) {
             setError('아이디 또는 비밀번호가 올바르지 않습니다.');
