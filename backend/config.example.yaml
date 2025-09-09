@@ -1,0 +1,31 @@
+## DDOS Router 백엔드 설정 예시
+# 이 파일을 `config.yaml`로 복사한 뒤 환경에 맞게 수정하세요.
+# 값이 비어 있거나 잘못되면 main에서 기본값으로 동작합니다.
+
+web_api:
+  # 웹 API 서버 바인딩 주소
+  # 예) 모든 인터페이스: ":2024"
+  #     로컬호스트만:    "127.0.0.1:2024"
+  listen_addr: ":2024"
+
+interface:
+  # 시스템(커널)의 실제 NIC 이름을 입력하세요.
+  # OpenWrt/일반 리눅스 예: "eth0"(WAN), "eth1"(LAN)
+  # 라우터 정보 조회/방화벽 초기화 등에서 사용됩니다.
+  wan_interface_name: "eth0"
+  lan_interface_name: "eth1"
+
+snort:
+  # Snort(또는 호환) 경보 로그(JSON Lines) 파일 경로
+  # 비워두면 스캔을 비활성화합니다.
+  # 예) "/var/log/snort/alert"
+  snort_log_path: "/var/log/snort/alert"
+  # 경보→차단 파이프라인 채널 버퍼 크기
+  buffer_size: 1024
+
+protection:
+  # 동적 차단 유지 시간(초). 만료되면 자동 해제됩니다.
+  protection_ttl: 30
+  # 하우스키핑 주기(ms): 만료 체크 등 내부 주기 동작
+  refresh_tick: 1000
+

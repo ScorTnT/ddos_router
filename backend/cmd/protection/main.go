@@ -103,10 +103,9 @@ func main() {
 	)
 	app.Use(api.RequestLogger())
 
-	apiGroup := app.Group("/api")
-	api.HandleRoutes(apiGroup, appConfig, protectionManager)
+	api.HandleRoutes(app, appConfig, protectionManager)
 
-	apiGroup.Get(
+	app.Get(
 		"/",
 		func(c *fiber.Ctx) error {
 			return api.RespondWithJSON(
