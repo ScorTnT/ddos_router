@@ -3,6 +3,10 @@ import InformationAPI from './information.js';
 import ConfigAPI from './config.js';
 import ProtectionAPI from './protection.js';
 
+// new
+import Cookies from 'js-cookie';
+// npm install js-cookie >> needed
+
 /**
  * Main API client that combines all API modules
  */
@@ -20,24 +24,44 @@ class RouterAPIClient {
     this._sessionId = null;
   }
 
+  // /**
+  //  * Set session ID for all API modules
+  //  * @param {string} sessionId - The session ID
+  //  */
+  // setSessionId(sessionId) {
+  //   this._sessionId = sessionId;
+  //   this.auth.setSessionId(sessionId);
+  //   this.information.setSessionId(sessionId);
+  //   this.config.setSessionId(sessionId);
+  //   this.protection.setSessionId(sessionId);
+  // }
+
+  // /**
+  //  * Get current session ID
+  //  * @returns {string|null} - The current session ID
+  //  */
+  // getSessionId() {
+  //   return this._sessionId;
+  // }
+
   /**
-   * Set session ID for all API modules
+   * Set session ID for authenticated requests
    * @param {string} sessionId - The session ID
-   */
+  */
   setSessionId(sessionId) {
-    this._sessionId = sessionId;
-    this.auth.setSessionId(sessionId);
-    this.information.setSessionId(sessionId);
-    this.config.setSessionId(sessionId);
-    this.protection.setSessionId(sessionId);
+    if (sessionId) {
+      Cookies.set('sessionId', sessionId, { expires: 1 });
+    } else {
+      Cookies.remove('sessionId');
+    }
   }
 
   /**
-   * Get current session ID
+   * Get session ID
    * @returns {string|null} - The current session ID
    */
   getSessionId() {
-    return this._sessionId;
+    return Cookies.get('sessionId') || null;
   }
 
   /**
