@@ -1,9 +1,10 @@
 /**
  * Base API class for handling HTTP requests
  */
+const API_URL = import.meta.env.VITE_API_URL
 class BaseAPI {
   constructor(baseURL = '') {
-    this.baseURL = baseURL;
+    this.baseURL = API_URL;
     this.sessionId = null;
   }
 

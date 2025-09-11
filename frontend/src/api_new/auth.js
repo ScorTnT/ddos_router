@@ -12,14 +12,20 @@ class AuthAPI extends BaseAPI {
    */
   async login(username, password) {
     try {
-      const response = await this.post('/api/auth/login', {
-        username,
-        password
-      });
+      // Use exact same data format as Postman
+      const requestData = {
+        "username": username,
+        "password": password
+      };
+      
+      console.log('[DEBUG] Login request data:', requestData);
+      console.log('[DEBUG] Request JSON:', JSON.stringify(requestData));
+      
+      const response = await this.post('/api/auth/login', requestData);
       
       // If login successful and response contains session info, store it
-      if (response && response.sessionId) {
-        this.setSessionId(response.sessionId);
+      if (response && response.data && response.data.session_id) {
+        this.setSessionId(response.data.session_id);
       }
       
       return response;

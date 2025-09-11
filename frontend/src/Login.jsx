@@ -35,24 +35,20 @@ const Login = ({setIsLoggedIn}) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
         setError('');
+        setIsLoading(true);
 
-        // try {
-        //     const loginSuccess = await attemptLogin(formData.username, formData.password);
-        //     if (loginSuccess) {
-        //         setIsLoggedIn(true);
-        //     } else {
-        //         setError('아이디 또는 비밀번호가 올바르지 않습니다.');
-        //     }
-        // } catch (err) {
-        //     setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
-        //     console.error('Login error:', err);
-        // } finally {
-        //     setIsLoading(false);
-        // }
+        // Validate input
+        if (!formData.username.trim() || !formData.password.trim()) {
+            setError('아이디와 비밀번호를 입력해주세요.');
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            await apiClient.auth.login(formData.username, formData.password);
+            console.log('[DEBUG] Submitting login with:', formData);
+            const response = await apiClient.auth.login(formData.username, formData.password);
+            console.log('Login successful:', response);
             setIsLoggedIn(true);
         } catch (err) {
             setError('아이디 또는 비밀번호가 올바르지 않습니다.');
@@ -60,6 +56,7 @@ const Login = ({setIsLoggedIn}) => {
         } finally {
             setIsLoading(false);
         }
+
     };
 
     return (
