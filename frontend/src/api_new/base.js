@@ -57,16 +57,35 @@ class BaseAPI {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        // Try to get error response body
+        let errorBody = '';
+        try {
+          const contentType = response.headers.get('Content-Type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorJson = await response.json();
+            errorBody = JSON.stringify(errorJson);
+            console.log('[DEBUG] Error Response JSON:', errorJson);
+          } else {
+            errorBody = await response.text();
+            console.log('[DEBUG] Error Response Text:', errorBody);
+          }
+        } catch (e) {
+          console.log('[DEBUG] Could not parse error response:', e);
+        }
+        
+        throw new Error(`HTTP Error: ${response.status} ${response.statusText} - ${errorBody}`);
       }
 
       // Check if response has content
       const contentType = response.headers.get('Content-Type');
       if (contentType && contentType.includes('application/json')) {
-        return await response.json();
+        const jsonResponse = await response.json();
+        return jsonResponse;
       }
       
-      return await response.text();
+      const textResponse = await response.text();
+      console.log('[DEBUG] Success Response Text:', textResponse);
+      return textResponse;
     } catch (error) {
       console.error('API Request Error:', error);
       throw error;
