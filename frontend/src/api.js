@@ -1,0 +1,179 @@
+// Simple axios-based API client for DDOS Router backend
+// - 환경변수: `VITE_API_URL` 를 baseURL로 사용합니다.
+// - 인증: 로그인 성공 시 발급되는 세션 ID를 `X-Session-ID` 헤더로 전송합니다.
+// - 응답 규약: { status: "success", data: ... } / { status: "error", message: "..." }
+
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://localhost";
+const SESSION_KEY = "session_id";
+
+// axios 인스턴스
+const http = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { "Content-Type": "application/json" },
+  timeout: 15000,
+});
+
+// 요청 인터셉터: 세션 헤더 자동 첨부
+http.interceptors.request.use((config) => {
+  const sid = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+  if (sid) config.headers["X-Session-ID"] = sid;
+  return config;
+});
+
+// 공통 응답 언래핑
+function unwrap(response) {
+  const payload = response?.data;
+  if (payload && payload.status === "success") return payload.data;
+  const message = payload?.message || "요청 처리 중 오류가 발생했습니다.";
+  const error = new Error(message);
+  error.response = response;
+  throw error;
+}
+
+// 헬스체크 (루트 엔드포인트)
+async function ping() {
+  const res = await http.get("/");
+  return unwrap(res); // { message: "DDOS Router API" }
+}
+
+async function isOnline() {
+  try {
+    await ping();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Auth
+async function login(username, password, options = { remember: false }) {
+  const res = await http.post("/auth/login", { username, password });
+  const data = unwrap(res); // { message, session_id, expires_at }
+  if (data?.session_id) setSession(data.session_id, !!options.remember);
+  return data;
+}
+
+async function logout() {
+  try {
+    await http.post("/auth/logout");
+  } finally {
+    clearSession();
+  }
+}
+
+function getSessionId() {
+  return sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY) || "";
+}
+
+// 세션 관리 유틸
+function setSession(id, persist = false) {
+  sessionStorage.setItem(SESSION_KEY, id || "");
+  if (persist) localStorage.setItem(SESSION_KEY, id || "");
+  else localStorage.removeItem(SESSION_KEY);
+}
+
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_KEY);
+}
+
+// Information
+async function getInformation() {
+  const res = await http.get("/information");
+  return unwrap(res);
+}
+
+async function getNeighbors() {
+  const res = await http.get("/information/neighbors");
+  return unwrap(res);
+}
+
+async function getConnections() {
+  const res = await http.get("/information/connections");
+  return unwrap(res);
+}
+
+// Config: WAN
+async function getWANConfig() {
+  const res = await http.get("/config/wan");
+  return unwrap(res);
+}
+
+async function updateWANConfig(data) {
+  const res = await http.post("/config/wan", data);
+  return unwrap(res);
+}
+
+// Config: LAN
+async function getLANConfig() {
+  const res = await http.get("/config/lan");
+  return unwrap(res);
+}
+
+async function updateLANConfig(data) {
+  const res = await http.post("/config/lan", data);
+  return unwrap(res);
+}
+
+// Protection
+async function getProtection() {
+  try {
+    const res = await http.get("/protection");
+    return unwrap(res);
+  } catch (err) {
+    // 서버가 빈 목록일 때 404를 돌려줌 → 빈 배열로 치환
+    const status = err?.response?.status;
+    if (status === 404) return [];
+    throw err;
+  }
+}
+
+async function blockIP(ip) {
+  if (!ip) throw new Error("IP가 필요합니다.");
+  // 백엔드 스펙: 쿼리스트링 ?ip=...
+  const res = await http.post("/protection/ip/block", null, { params: { ip } });
+  return unwrap(res);
+}
+
+async function unblockIP(ip) {
+  if (!ip) throw new Error("IP가 필요합니다.");
+  const res = await http.post("/protection/ip/unblock", null, { params: { ip } });
+  return unwrap(res);
+}
+
+// 사용 예)
+// import api from "./api";
+// await api.login("root", "password", { remember: true });
+// const info = await api.getInformation();
+
+const api = {
+  // health
+  ping,
+  isOnline,
+  // auth
+  login,
+  logout,
+  getSessionId,
+  // information
+  getInformation,
+  getNeighbors,
+  getConnections,
+  // config
+  getWANConfig,
+  updateWANConfig,
+  getLANConfig,
+  updateLANConfig,
+  // protection
+  getProtection,
+  blockIP,
+  unblockIP,
+  // low-level
+  http,
+  setSession,
+  clearSession,
+};
+
+export default api;
+export { ping, isOnline };

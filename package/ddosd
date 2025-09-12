@@ -1,0 +1,48 @@
+#!/bin/sh /etc/rc.common
+# The file name (backend) becomes the service name: /etc/init.d/backend
+START=95
+STOP=10
+USE_PROCD=1
+
+# === User-configurable section ===
+SERVICE_BIN="/root/backend/backend"   # Absolute path to the executable
+SERVICE_DIR="/root/backend"             # Working directory (where relative paths/configs are resolved)
+ARGS=""                             # Add CLI arguments if needed
+# Set LOG_TO_FILE=1 to log into a file (see below)
+LOG_TO_FILE=1
+LOG_PATH="/var/log/backend.log"
+# =================================
+
+start_service() {
+  procd_open_instance
+
+  if [ "$LOG_TO_FILE" = "1" ]; then
+    # File logging: run via /bin/sh -c to redirect stdout/stderr to a file after chdir
+    procd_set_param command /bin/sh -c "cd \"$SERVICE_DIR\" && exec \"$SERVICE_BIN\" $ARGS >>\"$LOG_PATH\" 2>&1"
+  else
+    # Syslog logging: connect stdout/stderr so you can view logs with `logread`
+    procd_set_param command /bin/sh -c "cd \"$SERVICE_DIR\" && exec \"$SERVICE_BIN\" \"$ARGS\""
+    procd_set_param stdout 1
+    procd_set_param stderr 1
+  fi
+
+  # Auto-restart on crash: (max 5 times, 1s interval, detect repeated crashes within 5s)
+  procd_set_param respawn 5 1 5
+
+  # Example: add environment variables if needed
+  # procd_append_param env APP_ENV=prod
+  # procd_append_param env SOME_FLAG=true
+
+  procd_close_instance
+}
+
+stop_service() {
+  # Leave empty if no special shutdown is required.
+  # procd will send SIGTERM and, if needed after a timeout, SIGKILL.
+  :
+}
+
+reload_service() {
+  # If the app does not support SIGHUP/config reload, fallback to restart
+  stop
+  start
