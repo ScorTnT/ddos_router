@@ -18,9 +18,10 @@ import {
     TableRow,
     Checkbox
 } from "@mui/material";
-
+import api from './api.js';
 import ProtectionAPI from './api_new/protection';
 const protectionAPI = new ProtectionAPI();
+
 function BlackList(){
     const [protectionLog, setProtectionLog] = useState([]);
     // 리스트 관리

@@ -16,10 +16,12 @@ import {
     TextField,
     Typography
 } from "@mui/material";
+import api from './api.js';
 import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
 import { getArpInfo } from './api/arpConfig'; 
 import { getArpNow } from './api/arpNow';
 import { getRouterInfo } from './api/getRouterInfo';
+
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("");
     const [ipAddress, setIpAddress] = useState("");

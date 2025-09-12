@@ -35,7 +35,7 @@ import {
     Speed as SpeedIcon
 } from '@mui/icons-material';
 import PropTypes from "prop-types";
-import apiClient from './api_new/index.js';
+import api from './api.js';
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
@@ -122,8 +122,8 @@ function InfoPanel() {
     const fetchRouterInfo = async () => {
         try {
             const [routerData, connectionsData] = await Promise.all([
-                apiClient.information.getRouterInfo(),
-                apiClient.information.getConnections()
+                api.getInformation(),
+                api.getConnections()
             ]);
             if (routerData) {
                 setRouterInfo(routerData);

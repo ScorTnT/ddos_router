@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import {Lock, Person, Visibility, VisibilityOff} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import apiClient from './api_new';
+import api from './api.js';
 
 const Login = ({setIsLoggedIn}) => {
     const [formData, setFormData] = useState({
@@ -23,7 +23,6 @@ const Login = ({setIsLoggedIn}) => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
     const handleChange = (e) => {
         const {name, value} = e.target;
         setFormData(prev => ({
@@ -32,13 +31,11 @@ const Login = ({setIsLoggedIn}) => {
         }));
         setError('');
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
 
-        // Validate input
         if (!formData.username.trim() || !formData.password.trim()) {
             setError('아이디와 비밀번호를 입력해주세요.');
             setIsLoading(false);
@@ -46,9 +43,9 @@ const Login = ({setIsLoggedIn}) => {
         }
 
         try {
-            console.log('[DEBUG] Submitting login with:', formData);
-            const response = await apiClient.auth.login(formData.username, formData.password);
-            console.log('Login successful:', response);
+            //console.log('[DEBUG] Submitting login with:', formData);
+            const response = await api.login(formData.username, formData.password);
+            //console.log('Login successful:', response);
             setIsLoggedIn(true);
         } catch (err) {
             setError('아이디 또는 비밀번호가 올바르지 않습니다.');

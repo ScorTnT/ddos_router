@@ -17,11 +17,9 @@ import {
     IconButton
 } from "@mui/material";
 import { Refresh as RefreshIcon } from '@mui/icons-material';
-
+//import api from './api.js';
 import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
 import { getArpInfo } from './api/arpConfig';
-
-//import apiClient from './api_new';
 
 function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("");
