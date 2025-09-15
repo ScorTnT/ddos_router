@@ -17,14 +17,6 @@ import {
     Typography
 } from "@mui/material";
 import api from './api.js';
-<<<<<<< HEAD
-=======
-import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
-import { getArpInfo } from './api/arpConfig'; 
-import { getArpNow } from './api/arpNow';
-import { getRouterInfo } from './api/getRouterInfo';
-
->>>>>>> abbd53f9fddff4e463e9be79891f7bc96cb18a04
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("");
     const [ipAddress, setIpAddress] = useState("");
