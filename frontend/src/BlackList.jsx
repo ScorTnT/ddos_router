@@ -19,8 +19,7 @@ import {
     Checkbox
 } from "@mui/material";
 
-import ProtectionAPI from './api_new/protection';
-const protectionAPI = new ProtectionAPI();
+import api from './api.js';
 function BlackList(){
     const [protectionLog, setProtectionLog] = useState([]);
     // 리스트 관리
@@ -37,7 +36,7 @@ function BlackList(){
 
     const FetchProtectionLog = async () => {
         try {
-            const protectionData = await getBlockedIP();
+            const protectionData = await api.getProtection();
             if (Array.isArray(protectionData)) setProtectionLog(protectionData);
             else setProtectionLog([]);
 

@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import {Lock, Person, Visibility, VisibilityOff} from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import apiClient from './api_new';
+import apiClient from './api.js';
 
 const Login = ({setIsLoggedIn}) => {
     const [formData, setFormData] = useState({
@@ -47,7 +47,7 @@ const Login = ({setIsLoggedIn}) => {
 
         try {
             console.log('[DEBUG] Submitting login with:', formData);
-            const response = await apiClient.auth.login(formData.username, formData.password);
+            const response = await apiClient.login(formData.username, formData.password);
             console.log('Login successful:', response);
             setIsLoggedIn(true);
         } catch (err) {

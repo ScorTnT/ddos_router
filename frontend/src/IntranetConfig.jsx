@@ -17,17 +17,13 @@ import {
     IconButton
 } from "@mui/material";
 import { Refresh as RefreshIcon } from '@mui/icons-material';
-
-import { LoadIntranetConfig, SaveIntranetConfig } from './api/intranetConfig';
-import { getArpInfo } from './api/arpConfig';
-
-//import apiClient from './api_new';
+import api from './api.js';
 
 function IntranetConfig() {
     const [ipAddress, setIpAddress] = useState("");
     const [subnetMask, setSubnetMask] = useState("");
     function fetchIntranetConfig() {
-        LoadIntranetConfig().then((data) => {
+        api.getLANConfig().then((data) => {
             if (data) {
                 setIpAddress(data.IPAddress || "");
                 setSubnetMask(data.Netmask || "");
@@ -89,7 +85,7 @@ function IntranetIP({ gateway }) {
     const gatewayPrefix = gateway.split('.').slice(0, 3).join('.');
     const fetchIntranetConfig = async () => {
         try {
-            const intranetData = await getArpInfo();
+            const intranetData = await api.getNeighbors();
 
             if(intranetData){
                 setIntranetConnection(intranetData);

@@ -16,10 +16,7 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import { LoadInternetConfig, SaveInternetConfig } from './api/internetConfig';
-import { getArpInfo } from './api/arpConfig'; 
-import { getArpNow } from './api/arpNow';
-import { getRouterInfo } from './api/getRouterInfo';
+import api from './api.js';
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("");
     const [ipAddress, setIpAddress] = useState("");
@@ -29,13 +26,13 @@ function NetworkConfig() {
     const [secondaryDNS, setSecondaryDNS] = useState("");
     const [wanMacAddress, setWanMacAddress] = useState("");
     const [mtu, setMtu] = useState("");
-    const [manualDns, setManualDns] = useState();
-    const [macAddressChange, setMacAddressChange] = useState();
-    const [manualMtu, setManualMtu] = useState();
+    const [manualDns, setManualDns] = useState(false);
+    const [macAddressChange, setMacAddressChange] = useState(false);
+    const [manualMtu, setManualMtu] = useState(false);
     const [macOptions, setMacOptions] = useState([]);
     const dhcpLabel = "dhcp 설정 사용중";
     const fetchInternetData = async () => {
-        const data = await LoadInternetConfig();
+        const data = await api.getWANConfig();
         if (data) {
             setConnectionType(data.connection_type);
             setIpAddress(data.ip_addr || "error");
@@ -46,8 +43,8 @@ function NetworkConfig() {
                 setSubnetMask(dhcpLabel);
                 setGateway(dhcpLabel);
             }
-            setPrimaryDNS(data.dns_list[0] || "error");
-            setSecondaryDNS(data.dns_list[1] || "error");
+            setPrimaryDNS(data.dns_list && data.dns_list[0] || "error");
+            setSecondaryDNS(data.dns_list && data.dns_list[1] || "error");
             setWanMacAddress(data.mac_addr || "");
             setMtu(data.mtu || "error");
             setManualDns(data.is_custom_dns || false);
@@ -56,22 +53,36 @@ function NetworkConfig() {
         }
     };
     const fetchArpData = async () => {
-        const routerData = await getRouterInfo();
+        const routerData = await api.getInformation();
         let routerMac = null;
         if (routerData) {
-            const macRow = routerData.find((row) => row.name === "MAC 주소");
+            // API 응답이 객체인 경우 배열로 변환
+            let routerArray = [];
+            if (Array.isArray(routerData)) {
+                routerArray = routerData;
+            } else if (typeof routerData === 'object') {
+                routerArray = Object.entries(routerData).map(([key, value]) => ({
+                    name: key,
+                    value: value
+                }));
+            }
+            
+            const macRow = routerArray.find((row) => row.name === "MAC 주소");
             if (macRow) {
                 routerMac = macRow.value;
             }
         }
-        const data = await getArpInfo();
-        const data1 = await getArpNow();
-        console.log(data1);
-        if (data) {
-            const macAddresses = data.map((row) => row.mac);
+        const data = await api.getNeighbors();
+        const data1 = await api.getConnections();
+        console.log('Connections data:', data1);
+        if (data && Array.isArray(data)) {
+            const macAddresses = data.map((row) => row.mac).filter(mac => mac); // null/undefined 제거
             const uniqueMacAddresses = Array.from(new Set(macAddresses));
-            const updatedMacOptions = [routerMac, ...uniqueMacAddresses.filter(mac => mac !== routerMac)];
+            const updatedMacOptions = [routerMac, ...uniqueMacAddresses.filter(mac => mac !== routerMac)].filter(mac => mac); // null 제거
             setMacOptions(updatedMacOptions);
+        } else {
+            console.log('No neighbors data or data is not an array');
+            setMacOptions(routerMac ? [routerMac] : []);
         }
 
     }
@@ -89,7 +100,7 @@ function NetworkConfig() {
             manualMtu: manualMtu,
         };
     
-        const result = await SaveInternetConfig(configData);
+        const result = await api.updateWANConfig(configData);
         if (result) {
             alert("설정이 성공적으로 저장되었습니다!");
         } else {
@@ -196,7 +207,7 @@ function NetworkConfig() {
                     <FormControl fullWidth disabled={!macAddressChange}>
                         <InputLabel>WAN MAC 주소</InputLabel>
                         <Select
-                            value={wanMacAddress}
+                            value={wanMacAddress || ""}
                             onChange={(e) => setWanMacAddress(e.target.value)}
                         >
                             {macOptions.map((mac, index) => (

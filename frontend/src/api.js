@@ -17,10 +17,37 @@ const http = axios.create({
 
 // 요청 인터셉터: 세션 헤더 자동 첨부
 http.interceptors.request.use((config) => {
-  const sid = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
-  if (sid) config.headers["X-Session-ID"] = sid;
+  const sidSession = sessionStorage.getItem(SESSION_KEY);
+  const sidLocal = localStorage.getItem(SESSION_KEY);
+  const sid = sidSession || sidLocal;
+  
+  console.log('[API] Request interceptor - SessionStorage:', sidSession);
+  console.log('[API] Request interceptor - LocalStorage:', sidLocal);
+  console.log('[API] Request interceptor - Final sid:', sid);
+  
+  if (sid) {
+    config.headers["X-Session-ID"] = sid;
+    console.log('[API] Adding session header:', sid);
+    console.log('[API] Final headers:', config.headers);
+  } else {
+    console.warn('[API] No session ID found for request to:', config.url);
+  }
+  
+  console.log('[API] Request:', config.method?.toUpperCase(), config.url);
   return config;
 });
+
+// 응답 인터셉터: 에러 로깅
+http.interceptors.response.use(
+  (response) => {
+    console.log('[API] Response:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('[API] Error:', error.response?.status, error.config?.url, error.response?.data);
+    return Promise.reject(error);
+  }
+);
 
 // 공통 응답 언래핑
 function unwrap(response) {
@@ -49,15 +76,21 @@ async function isOnline() {
 
 // Auth
 async function login(username, password, options = { remember: false }) {
-  const res = await http.post("/auth/login", { username, password });
+  const res = await http.post("/api/auth/login", { username, password });
   const data = unwrap(res); // { message, session_id, expires_at }
-  if (data?.session_id) setSession(data.session_id, !!options.remember);
+  console.log('[API] Login response data:', data);
+  if (data?.session_id) {
+    console.log('[API] Setting session:', data.session_id);
+    setSession(data.session_id, !!options.remember);
+  } else {
+    console.error('[API] No session_id in response:', data);
+  }
   return data;
 }
 
 async function logout() {
   try {
-    await http.post("/auth/logout");
+    await http.post("/api/auth/logout");
   } finally {
     clearSession();
   }
@@ -69,9 +102,11 @@ function getSessionId() {
 
 // 세션 관리 유틸
 function setSession(id, persist = false) {
+  console.log('[API] setSession called:', id, 'persist:', persist);
   sessionStorage.setItem(SESSION_KEY, id || "");
   if (persist) localStorage.setItem(SESSION_KEY, id || "");
   else localStorage.removeItem(SESSION_KEY);
+  console.log('[API] Session stored. SessionStorage:', sessionStorage.getItem(SESSION_KEY));
 }
 
 function clearSession() {
@@ -81,46 +116,46 @@ function clearSession() {
 
 // Information
 async function getInformation() {
-  const res = await http.get("/information");
+  const res = await http.get("/api/information");
   return unwrap(res);
 }
 
 async function getNeighbors() {
-  const res = await http.get("/information/neighbors");
+  const res = await http.get("/api/information/neighbors");
   return unwrap(res);
 }
 
 async function getConnections() {
-  const res = await http.get("/information/connections");
+  const res = await http.get("/api/information/connections");
   return unwrap(res);
 }
 
 // Config: WAN
 async function getWANConfig() {
-  const res = await http.get("/config/wan");
+  const res = await http.get("/api/config/wan");
   return unwrap(res);
 }
 
 async function updateWANConfig(data) {
-  const res = await http.post("/config/wan", data);
+  const res = await http.post("/api/config/wan", data);
   return unwrap(res);
 }
 
 // Config: LAN
 async function getLANConfig() {
-  const res = await http.get("/config/lan");
+  const res = await http.get("/api/config/lan");
   return unwrap(res);
 }
 
 async function updateLANConfig(data) {
-  const res = await http.post("/config/lan", data);
+  const res = await http.post("/api/config/lan", data);
   return unwrap(res);
 }
 
 // Protection
 async function getProtection() {
   try {
-    const res = await http.get("/protection");
+    const res = await http.get("/api/protection");
     return unwrap(res);
   } catch (err) {
     // 서버가 빈 목록일 때 404를 돌려줌 → 빈 배열로 치환
@@ -133,13 +168,13 @@ async function getProtection() {
 async function blockIP(ip) {
   if (!ip) throw new Error("IP가 필요합니다.");
   // 백엔드 스펙: 쿼리스트링 ?ip=...
-  const res = await http.post("/protection/ip/block", null, { params: { ip } });
+  const res = await http.post("/api/protection/ip/block", null, { params: { ip } });
   return unwrap(res);
 }
 
 async function unblockIP(ip) {
   if (!ip) throw new Error("IP가 필요합니다.");
-  const res = await http.post("/protection/ip/unblock", null, { params: { ip } });
+  const res = await http.post("/api/protection/ip/unblock", null, { params: { ip } });
   return unwrap(res);
 }
 
