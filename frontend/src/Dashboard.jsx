@@ -35,7 +35,11 @@ import {
     Speed as SpeedIcon
 } from '@mui/icons-material';
 import PropTypes from "prop-types";
+<<<<<<< HEAD
 import apiClient from './api.js';
+=======
+import api from './api.js';
+>>>>>>> abbd53f9fddff4e463e9be79891f7bc96cb18a04
 import NetworkConfig from './NetworkConfig.jsx';
 import IntranetConfig from './IntranetConfig.jsx';
 import UserConfig from './UserConfig.jsx';
@@ -122,8 +126,13 @@ function InfoPanel() {
     const fetchRouterInfo = async () => {
         try {
             const [routerData, connectionsData] = await Promise.all([
+<<<<<<< HEAD
                 apiClient.getInformation(),
                 apiClient.getConnections()
+=======
+                api.getInformation(),
+                api.getConnections()
+>>>>>>> abbd53f9fddff4e463e9be79891f7bc96cb18a04
             ]);
             if (routerData) {
                 // API 응답이 객체인 경우 배열로 변환
