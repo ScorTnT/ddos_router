@@ -43,8 +43,8 @@ function NetworkConfig() {
                 setSubnetMask(dhcpLabel);
                 setGateway(dhcpLabel);
             }
-            setPrimaryDNS(data.dns_list && data.dns_list[0] || "error");
-            setSecondaryDNS(data.dns_list && data.dns_list[1] || "error");
+            setPrimaryDNS(data.dns_list && data.dns_list[0] || dhcpLabel);
+            setSecondaryDNS(data.dns_list && data.dns_list[1] || dhcpLabel);
             setWanMacAddress(data.mac_addr || "");
             setMtu(data.mtu || "error");
             setManualDns(data.is_custom_dns || false);
