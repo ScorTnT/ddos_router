@@ -43,12 +43,10 @@ const Login = ({setIsLoggedIn}) => {
         }
 
         try {
-            //console.log('[DEBUG] Submitting login with:', formData);
-            const response = await api.login(formData.username, formData.password);
-            //console.log('Login successful:', response);
+            await api.login(formData.username, formData.password);
             setIsLoggedIn(true);
         } catch (err) {
-            setError('아이디 또는 비밀번호가 올바르지 않습니다.');
+            setError(err.message || '아이디 또는 비밀번호가 올바르지 않습니다.');
             console.error('Login error:', err);
         } finally {
             setIsLoading(false);
