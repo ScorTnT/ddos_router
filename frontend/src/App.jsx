@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   HashRouter,
   Navigate,
@@ -8,9 +8,47 @@ import {
 import Login from "./Login.jsx";
 import Dashboard from "./Dashboard.jsx";
 import APIGuide from "./APIGuide.jsx";
+import api from "./api.js";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    // 앱 시작 시 자동 로그인 체크
+    const checkAutoLogin = async () => {
+      try {
+        const isValid = await api.checkAutoLogin();
+        if (isValid) {
+          console.log('[App] Auto login successful');
+          setIsLoggedIn(true);
+        } else {
+          console.log('[App] No valid session found');
+        }
+      } catch (error) {
+        console.error('[App] Auto login check failed:', error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAutoLogin();
+  }, []);
+
+  // 자동 로그인 체크 중일 때는 로딩 표시
+  if (isCheckingAuth) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px' 
+      }}>
+        로그인 정보 확인 중...
+      </div>
+    );
+  }
 
   return (
     <HashRouter>

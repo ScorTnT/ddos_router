@@ -75,7 +75,7 @@ async function isOnline() {
 }
 
 // Auth
-async function login(username, password, options = { remember: false }) {
+async function login(username, password, options = { remember: true }) {
   const res = await http.post("/api/auth/login", { username, password });
   const data = unwrap(res); // { message, session_id, expires_at }
   console.log('[API] Login response data:', data);
@@ -88,9 +88,32 @@ async function login(username, password, options = { remember: false }) {
   return data;
 }
 
+// 자동 로그인 체크 (앱 시작 시 호출)
+async function checkAutoLogin() {
+  const sessionId = getSessionId();
+  if (!sessionId) {
+    console.log('[API] No stored session found');
+    return false;
+  }
+  
+  console.log('[API] Found stored session, checking validity:', sessionId);
+  try {
+    // 세션이 유효한지 확인 (간단한 API 호출로 테스트)
+    await getInformation();
+    console.log('[API] Stored session is valid');
+    return true;
+  } catch (error) {
+    console.log('[API] Stored session is invalid, clearing:', error.message);
+    clearSession();
+    return false;
+  }
+}
+
 async function logout() {
   try {
     await http.post("/api/auth/logout");
+  } catch (error) {
+    console.error('[API] Logout request failed:', error);
   } finally {
     clearSession();
   }
@@ -190,6 +213,7 @@ const api = {
   // auth
   login,
   logout,
+  checkAutoLogin,
   getSessionId,
   // information
   getInformation,

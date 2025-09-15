@@ -49,8 +49,15 @@ function Dashboard({ setIsLoggedIn }) {
         setCurrentTab(newValue);
     };
 
-    const handleLogout = () => {
-        setIsLoggedIn(false);
+    const handleLogout = async () => {
+        try {
+            await apiClient.logout();
+            console.log('[Dashboard] Logout successful');
+        } catch (error) {
+            console.error('[Dashboard] Logout error:', error);
+        } finally {
+            setIsLoggedIn(false);
+        }
     };
 
     return (
