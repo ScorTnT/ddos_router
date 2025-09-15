@@ -7,10 +7,11 @@ import (
 )
 
 func InitFirewall() error {
+	// Use create instead of add for table and set to avoid potential overwrites
 	commands := [][]string{
 		{"add", "table", "inet", "ddos_filter"},
 		{"add", "chain", "inet", "ddos_filter", "forward", "{ type filter hook forward priority 30 ; policy accept ; }"},
-		{"add", "set", "inet", "ddos_filter", "ban_set", "{ type ipv4_addr; }"},
+		{"create", "set", "inet", "ddos_filter", "ban_set", "{ type ipv4_addr; }"},
 		{"add", "rule", "inet", "ddos_filter", "forward", "iifname", "br-lan", "oifname", "eth0", "ip", "saddr", "@ban_set", "drop"},
 	}
 
@@ -18,6 +19,14 @@ func InitFirewall() error {
 		cmd := exec.Command("nft", args...)
 
 		if output, err := cmd.CombinedOutput(); err != nil {
+			// If the set already exists, that's okay for create set command
+			if args[0] == "create" && args[1] == "set" {
+				// Check if error is due to set already existing
+				outputStr := string(output)
+				if strings.Contains(outputStr, "File exists") || strings.Contains(outputStr, "already exists") {
+					continue // Set already exists, which is fine
+				}
+			}
 			return fmt.Errorf("failed to execute nft command %v: %w\nOutput: %s", args, err, output)
 		}
 	}
@@ -67,7 +76,9 @@ func GetBlockedIPs() ([]string, error) {
 }
 
 func modifyBanSet(action, ip string) error {
-	cmd := exec.Command("nft", action, "element", "inet", "ddos_filter", "ban_set", fmt.Sprintf("{ %s }", ip))
+	// Use explicit element syntax to ensure proper set management
+	elementSpec := fmt.Sprintf("{ %s }", ip)
+	cmd := exec.Command("nft", action, "element", "inet", "ddos_filter", "ban_set", elementSpec)
 
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("failed to %s IP %s: %w\nOutput: %s", action, ip, err, output)
