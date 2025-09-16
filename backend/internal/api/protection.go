@@ -1,11 +1,12 @@
 package api
 
 import (
-    "net"
-    "strings"
+	"net"
+	"strconv"
+	"strings"
 
-    "github.com/ScorTnT/ddos_router/backend/internal/protection"
-    "github.com/gofiber/fiber/v2"
+	"github.com/ScorTnT/ddos_router/backend/internal/protection"
+	"github.com/gofiber/fiber/v2"
 )
 
 func GetProtection(protectionManager *protection.Manager) fiber.Handler {
@@ -21,37 +22,43 @@ func GetProtection(protectionManager *protection.Manager) fiber.Handler {
 }
 
 func PostIPBlock(protectionManager *protection.Manager) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        ip := strings.TrimSpace(c.Query("ip"))
-        if ip == "" {
-            return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
-        }
+	return func(c *fiber.Ctx) error {
+		ip := strings.TrimSpace(c.Query("ip"))
+		if ip == "" {
+			return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
+		}
 
-        parsed := net.ParseIP(ip)
-        if parsed == nil {
-            return RespondWithError(c, fiber.StatusBadRequest, "Invalid IP address")
-        }
+		parsed := net.ParseIP(ip)
+		if parsed == nil {
+			return RespondWithError(c, fiber.StatusBadRequest, "Invalid IP address")
+		}
 
-        protectionManager.Add(parsed.String())
+		isPermanent, err := strconv.ParseBool(c.Query("is_permanent", "false"))
 
-        return RespondWithCustomMessage(c, fiber.StatusOK, "IP address added from firewall rules")
-    }
+		if err != nil {
+			return RespondWithError(c, fiber.StatusBadRequest, "Invalid value for 'is_permanent'")
+		}
+
+		protectionManager.Add(parsed.String(), isPermanent)
+
+		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address added from firewall rules")
+	}
 }
 
 func PostIPUnblock(protectionManager *protection.Manager) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        ip := strings.TrimSpace(c.Query("ip"))
-        if ip == "" {
-            return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
-        }
+	return func(c *fiber.Ctx) error {
+		ip := strings.TrimSpace(c.Query("ip"))
+		if ip == "" {
+			return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
+		}
 
-        parsed := net.ParseIP(ip)
-        if parsed == nil {
-            return RespondWithError(c, fiber.StatusBadRequest, "Invalid IP address")
-        }
+		parsed := net.ParseIP(ip)
+		if parsed == nil {
+			return RespondWithError(c, fiber.StatusBadRequest, "Invalid IP address")
+		}
 
-        protectionManager.Delete(parsed.String())
+		protectionManager.Delete(parsed.String())
 
-        return RespondWithCustomMessage(c, fiber.StatusOK, "IP address deleted from firewall rules")
-    }
+		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address deleted from firewall rules")
+	}
 }
