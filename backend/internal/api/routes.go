@@ -20,11 +20,19 @@ func HandleRoutes(apiGroup fiber.Router, appConfig *internal.Config, protectionM
 	configGroup.Post("/wan", PostWANConfig)
 	configGroup.Post("/lan", PostLANConfig)
 
+	// Blacklist from protection group
 	protectionGroup := apiGroup.Group("/protection")
 	protectionGroup.Use(ValidateSessionMiddleware)
 	protectionGroup.Get("/", GetProtection(protectionManager))
 	protectionGroup.Post("/ip/block", PostIPBlock(protectionManager))
 	protectionGroup.Post("/ip/unblock", PostIPUnblock(protectionManager))
+
+	// Whitelist from protection group
+	whitelistGroup := protectionGroup.Group("/whitelist")
+	whitelistGroup.Use(ValidateSessionMiddleware)
+	whitelistGroup.Get("/", GetWhitelist(protectionManager))
+	whitelistGroup.Post("/add", PostIPAddWhitelist(protectionManager))
+	whitelistGroup.Post("/remove", PostIPDeleteWhitelist(protectionManager))
 
 	authGroup := apiGroup.Group("/auth")
 	authGroup.Post("/login", Login)
