@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:local": "VITE_API_URL=https://192.168.1.93 vite build",
+    "build:prod": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
