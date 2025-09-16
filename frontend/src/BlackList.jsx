@@ -120,10 +120,9 @@ function BlackList() {
         return () => clearInterval(intervalId);
     }, [isAutoUpdate]);
     
-    //const blockedIp = ipList.filter(item => item.status === IP_STATUS.BLOCKED);
     const blackList = ipList.filter(item => item.status === IP_STATUS.BLACKLIST);
     const whiteList = ipList.filter(item => item.status === IP_STATUS.WHITELIST);
-    //const selectedBlockedIp = blockedIp.filter(item => item.isSelected).length;
+
     const selectedBlackList = blackList.filter(item => item.isSelected).length;
     const selectedWhiteList= whiteList.filter(item => item.isSelected).length;
 

@@ -17,6 +17,7 @@ import {
     Typography
 } from "@mui/material";
 import api from './api.js';
+
 function NetworkConfig() {
     const [connectionType, setConnectionType] = useState("");
     const [ipAddress, setIpAddress] = useState("");

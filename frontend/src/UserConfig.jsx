@@ -9,6 +9,7 @@ import {
     Checkbox,
     FormControlLabel
 } from "@mui/material";
+//import api from './api.js';
 
 function UserConfig() {
     const [adminId, setAdminId] = useState("root"); // 현재 관리자 계정 (예시: root)
