@@ -62,3 +62,51 @@ func PostIPUnblock(protectionManager *protection.Manager) fiber.Handler {
 		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address deleted from firewall rules")
 	}
 }
+
+func GetWhitelist(protectionManager *protection.Manager) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		whitelist := protectionManager.SnapshotWhitelist()
+
+		if len(whitelist) == 0 {
+			return RespondWithError(c, fiber.StatusNotFound, "Whitelist is Empty")
+		}
+
+		return RespondWithJSON(c, fiber.StatusOK, whitelist)
+	}
+}
+
+func PostIPAddWhitelist(protectionManager *protection.Manager) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		ip := strings.TrimSpace(c.Query("ip"))
+		if ip == "" {
+			return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
+		}
+
+		parsed := net.ParseIP(ip)
+		if parsed == nil {
+			return RespondWithError(c, fiber.StatusBadRequest, "Invalid IP address")
+		}
+
+		protectionManager.AddWhitelist(parsed.String())
+
+		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address added to whitelist")
+	}
+}
+
+func PostIPDeleteWhitelist(protectionManager *protection.Manager) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		ip := strings.TrimSpace(c.Query("ip"))
+		if ip == "" {
+			return RespondWithError(c, fiber.StatusBadRequest, "IP address is required")
+		}
+
+		parsed := net.ParseIP(ip)
+		if parsed == nil {
+			return RespondWithError(c, fiber.StatusBadRequest, "Invalid IP address")
+		}
+
+		protectionManager.DeleteWhitelist(parsed.String())
+
+		return RespondWithCustomMessage(c, fiber.StatusOK, "IP address deleted from whitelist")
+	}
+}
