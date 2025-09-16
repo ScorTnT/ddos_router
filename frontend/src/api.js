@@ -188,10 +188,10 @@ async function getProtection() {
   }
 }
 
-async function blockIP(ip) {
+async function blockIP(ip, isPermanent = false) {
   if (!ip) throw new Error("IP가 필요합니다.");
   // 백엔드 스펙: 쿼리스트링 ?ip=...
-  const res = await http.post("/api/protection/ip/block", null, { params: { ip } });
+  const res = await http.post("/api/protection/ip/block", null, { params: { ip, is_permanent: isPermanent } });
   return unwrap(res);
 }
 
