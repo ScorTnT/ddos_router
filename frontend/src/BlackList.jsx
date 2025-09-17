@@ -4,7 +4,6 @@ import {
     Box,
     Card,
     CardContent,
-    TextField,
     Stack,
     TableContainer,
     Table,
@@ -13,12 +12,9 @@ import {
     TableCell,
     Paper,
     Typography,
-    Tooltip,
-    IconButton,
     TableRow,
     Checkbox
 } from "@mui/material";
-import { Refresh as RefreshIcon } from '@mui/icons-material';
 import api from './api.js';
 
 const IP_STATUS = {
@@ -34,7 +30,7 @@ const formatTime = (timestamp) => {
 
 function BlackList() {
     const [ipList, setIpList] = useState([]);
-    const [isAutoUpdate, setIsAutoUpdate] = useState(true);
+    const [selectedIps, setSelectedIps] = useState(new Set()); // IP 주소를 Set으로 관리
     const [updateError, setUpdateError] = useState(null);
 
     const fetchProtectionLog = async () => {
@@ -43,7 +39,7 @@ function BlackList() {
             const rawIpList = data.map(ipObj => ({
                 ...ipObj,
                 status : IP_STATUS.BLACKLIST,
-                isSelected : false,
+                isSelected : selectedIps.has(ipObj.ip), // selectedIps Set에 있는지 확인
             }));
             
             setIpList(rawIpList);
@@ -55,6 +51,17 @@ function BlackList() {
     };
 
     const handleCheck = (ip) => {
+        setSelectedIps(prev => {
+            const newSelected = new Set(prev);
+            if (newSelected.has(ip)) {
+                newSelected.delete(ip); // 이미 선택된 경우 제거
+            } else {
+                newSelected.add(ip); // 선택되지 않은 경우 추가
+            }
+            return newSelected;
+        });
+
+        // ipList의 isSelected 상태도 동기화
         setIpList((prev) =>
             prev.map((item) =>
                 item.ip === ip ? { ...item, isSelected: !item.isSelected } : item
@@ -64,7 +71,7 @@ function BlackList() {
 
     // Black -> White
     const handleWhite = async () => {
-        const selectedIp = ipList.filter(item => item.isSelected && item.status === IP_STATUS.BLACKLIST);
+        const selectedIp = ipList.filter(item => selectedIps.has(item.ip) && item.status === IP_STATUS.BLACKLIST);
         if (selectedIp.length === 0) {
             alert('선택된 ip가 존재하지 않습니다.');
             return;
@@ -72,10 +79,16 @@ function BlackList() {
         try {
             for (const ipObj of selectedIp) {
                 await api.unblockIP(ipObj.ip);
+                // 성공적으로 처리된 IP는 선택 목록에서 제거
+                setSelectedIps(prev => {
+                    const newSelected = new Set(prev);
+                    newSelected.delete(ipObj.ip);
+                    return newSelected;
+                });
             }
             setIpList(prev =>
                 prev.map(item =>
-                    item.isSelected && item.status === IP_STATUS.BLACKLIST
+                    selectedIps.has(item.ip) && item.status === IP_STATUS.BLACKLIST
                         ? { ...item, status: IP_STATUS.WHITELIST, isSelected: false }
                         : item
                 )
@@ -88,7 +101,7 @@ function BlackList() {
 
     // White -> Black
     const handleBlack = async () => {
-        const selectedIp = ipList.filter(item => item.isSelected && item.status === IP_STATUS.WHITELIST);
+        const selectedIp = ipList.filter(item => selectedIps.has(item.ip) && item.status === IP_STATUS.WHITELIST);
         if (selectedIp.length === 0) {
             alert('선택된 ip가 존재하지 않습니다.');
             return;
@@ -96,10 +109,16 @@ function BlackList() {
         try {
             for (const ipObj of selectedIp) {
                 await api.blockIP(ipObj.ip);
+                // 성공적으로 처리된 IP는 선택 목록에서 제거
+                setSelectedIps(prev => {
+                    const newSelected = new Set(prev);
+                    newSelected.delete(ipObj.ip);
+                    return newSelected;
+                });
             }
             setIpList(prev =>
                 prev.map(item =>
-                    item.isSelected && item.status === IP_STATUS.WHITELIST
+                    selectedIps.has(item.ip) && item.status === IP_STATUS.WHITELIST
                         ? { ...item, status: IP_STATUS.BLACKLIST, isSelected: false }
                         : item
                 )
@@ -109,22 +128,18 @@ function BlackList() {
             alert('IP 차단 중 오류가 발생했습니다.');
         }
     };
-    
-    useEffect(() => {
-        fetchProtectionLog();
-    }, []);
 
     useEffect(() => {
-        if (!isAutoUpdate) return;
+        fetchProtectionLog();
         const intervalId = setInterval(fetchProtectionLog, 5000);
         return () => clearInterval(intervalId);
-    }, [isAutoUpdate]);
+    }, []);
     
     const blackList = ipList.filter(item => item.status === IP_STATUS.BLACKLIST);
     const whiteList = ipList.filter(item => item.status === IP_STATUS.WHITELIST);
 
-    const selectedBlackList = blackList.filter(item => item.isSelected).length;
-    const selectedWhiteList= whiteList.filter(item => item.isSelected).length;
+    const selectedBlackList = blackList.filter(item => selectedIps.has(item.ip)).length;
+    const selectedWhiteList = whiteList.filter(item => selectedIps.has(item.ip)).length;
 
     return (
         <Stack spacing={3}>
@@ -173,10 +188,10 @@ function BlackList() {
                                         </TableCell>
                                     </TableRow>
                                 ) : blackList.map((pLog, index) => (
-                                    <TableRow key={index} selected={pLog.isSelected}>
+                                    <TableRow key={pLog.ip} selected={selectedIps.has(pLog.ip)}>
                                         <TableCell padding="checkbox">
                                             <Checkbox
-                                                checked={pLog.isSelected}
+                                                checked={selectedIps.has(pLog.ip)}
                                                 onChange={() => handleCheck(pLog.ip)}
                                             />
                                         </TableCell>
@@ -227,10 +242,10 @@ function BlackList() {
                                         </TableCell>
                                     </TableRow>
                                 ) : whiteList.map((pLog, index) => (
-                                    <TableRow key={index} selected={pLog.isSelected}>
+                                    <TableRow key={pLog.ip} selected={selectedIps.has(pLog.ip)}>
                                         <TableCell padding="checkbox">
                                             <Checkbox
-                                                checked={pLog.isSelected}
+                                                checked={selectedIps.has(pLog.ip)}
                                                 onChange={() => handleCheck(pLog.ip)}
                                             />
                                         </TableCell>
