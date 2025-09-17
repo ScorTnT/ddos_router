@@ -1,0 +1,42 @@
+#!/bin/sh /etc/rc.common
+# Custom Snort 3 init.d script for OpenWrt
+
+START=95
+STOP=10
+USE_PROCD=1
+SERVICE_NAME="snort"
+
+# === User-configurable section ===
+# Correct path to the snort executable, found from the official script.
+SERVICE_BIN="/usr/bin/snort"
+
+# Working directory for snort
+SERVICE_DIR="/etc/snort"
+
+# Arguments for snort, including the ones needed for daemon mode.
+ARGS="-q -c /etc/snort/snort.lua -i br-lan --tweaks local -Q"
+# =================================
+
+start_service() {
+  procd_open_instance "$SERVICE_NAME"
+  
+  # Change directory and then execute snort
+  procd_set_param command /bin/sh -c "cd '$SERVICE_DIR' && exec '$SERVICE_BIN' $ARGS"
+  
+  # Forward stdout/stderr to system log
+  procd_set_param stdout 1
+  procd_set_param stderr 1
+  
+  # Auto-restart on crash
+  procd_set_param respawn 5 1 5
+  
+  procd_close_instance
+}
+
+reload_service() {
+  procd_send_signal "$SERVICE_NAME" SIGHUP
+}
+
+stop_service() {
+  :
+}
