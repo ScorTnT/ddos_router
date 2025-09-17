@@ -110,7 +110,7 @@ performLogin();`}
     "data": {
         "message": "로그인 성공",
         "session_id": "string",
-        "expires_at": "number (Unix timestamp)"
+        "expires_at": "string"
     }
 }`}
           </code>
@@ -245,7 +245,9 @@ performLogin();`}
           · Request Parameters (`/api/protection/ip/block`)
         </Typography>
         <Typography>
-          - **Query String**: `?ip=string&is_permanent=boolean`
+          - **Query String**: `?ip=string&is_permanent=boolean`<br />
+          - **ip**: 차단할 IP 주소 (필수)<br />
+          - **is_permanent**: 영구 차단 여부 (선택, 기본값: false)
         </Typography>
       </Paper>
     </Stack>
