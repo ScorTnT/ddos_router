@@ -1,17 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import {
     AppBar,
     Box,
     Button,
     Card,
     CardContent,
-    FormControl,
     FormControlLabel,
     IconButton,
-    InputLabel,
-    MenuItem,
     Paper,
-    Select,
     Stack,
     Switch,
     Tab,
@@ -22,7 +18,6 @@ import {
     TableHead,
     TableRow,
     Tabs,
-    TextField,
     Toolbar,
     Tooltip,
     Typography
@@ -36,11 +31,13 @@ import {
 } from '@mui/icons-material';
 import PropTypes from "prop-types";
 import apiClient from './api.js';
-import NetworkConfig from './NetworkConfig.jsx';
-import IntranetConfig from './IntranetConfig.jsx';
-import UserConfig from './UserConfig.jsx';
-import BlackList from './BlackList.jsx';
-import APIGuide from './APIGuide.jsx';
+
+// React.lazy로 탭 컴포넌트들 분할
+const NetworkConfig = lazy(() => import('./NetworkConfig.jsx'));
+const IntranetConfig = lazy(() => import('./IntranetConfig.jsx'));
+const UserConfig = lazy(() => import('./UserConfig.jsx'));
+const BlackList = lazy(() => import('./BlackList.jsx'));
+const APIGuide = lazy(() => import('./APIGuide.jsx'));
 
 function Dashboard({ setIsLoggedIn }) {
     const [currentTab, setCurrentTab] = useState(0);
@@ -107,12 +104,24 @@ function Dashboard({ setIsLoggedIn }) {
             </AppBar>
 
             <Box sx={{ p: 4 }}>
-                {currentTab === 0 && <InfoPanel />}
-                {currentTab === 1 && <NetworkConfig />}
-                {currentTab === 2 && <IntranetConfig />}
-                {currentTab === 3 && <BlackList />}
-                {currentTab === 4 && <UserConfig />}
-                {currentTab === 5 && <APIGuide />}
+                <Suspense fallback={
+                    <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        height: '200px',
+                        fontSize: '16px' 
+                    }}>
+                        컴포넌트 로딩 중...
+                    </Box>
+                }>
+                    {currentTab === 0 && <InfoPanel />}
+                    {currentTab === 1 && <NetworkConfig />}
+                    {currentTab === 2 && <IntranetConfig />}
+                    {currentTab === 3 && <BlackList />}
+                    {currentTab === 4 && <UserConfig />}
+                    {currentTab === 5 && <APIGuide />}
+                </Suspense>
             </Box>
         </Box>
     );
