@@ -1,13 +1,10 @@
 ips = {
         mode = tap,
         rules = [[
-                alert icmp 192.168.2.0/24 any -> any any (msg:"INLINE ICMP"; sid:1; rev:1;)
+                alert icmp 192.168.3.225/32 any -> any any (msg:"INLINE ICMP"; sid:1; rev:1;)
+                alert tcp 192.168.3.225/32 any -> any any (msg:"INLINE TCP"; sid:2; rev:1;)
         ]]
 }
-
---              alert tcp any any -> any any (msg:"INLINE TCP Test"; sid:1000002; rev:1;)
---              include /etc/snort/rules/local2.rules
---              include /etc/snort/rules/local.rules
 
 daq = {
         module_dirs = { '/usr/lib/daq' },
