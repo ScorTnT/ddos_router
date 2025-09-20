@@ -1,4 +1,4 @@
-ps = {
+ips = {
         mode = tap,
         rules = [[
                 alert icmp 192.168.2.0/24 any -> any any (msg:"INLINE ICMP"; sid:1; rev:1;)
