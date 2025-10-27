@@ -14,7 +14,7 @@ SERVICE_BIN="/usr/bin/snort"
 SERVICE_DIR="/etc/snort"
 
 # Arguments for snort, including the ones needed for daemon mode.
-ARGS="-q -c /etc/snort/snort.lua -i br-lan --tweaks local -Q"
+ARGS="-q -c /etc/snort/snort.lua -i br-lan --tweaks local"
 # =================================
 
 start_service() {
