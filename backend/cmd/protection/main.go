@@ -27,8 +27,9 @@ func main() {
 				ListenAddr: ":2024",
 			},
 			Interface: internal.InferfaceConfig{
-				WANInterfaceName: "eth0",
-				LANInterfaceName: "eth1",
+				WANInterfaceName:    "eth0",
+				LANInterfaceName:    "eth1",
+				BridgeInterfaceName: "br-lan",
 			},
 			Snort: internal.SnortAlertScannerConfig{
 				SnortLogPath: "/var/log/snort/alert",
@@ -43,7 +44,7 @@ func main() {
 
 	log.Printf("[INFO] Loaded configuration. API listen address: %s", appConfig.WebAPI.ListenAddr)
 
-	if err := firewall.InitFirewall(); err != nil {
+	if err := firewall.InitFirewall(appConfig.Interface.BridgeInterfaceName, appConfig.Interface.WANInterfaceName); err != nil {
 		log.Fatalf("[ERROR] Failed to initialize firewall: %v", err)
 	}
 
