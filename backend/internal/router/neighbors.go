@@ -15,7 +15,7 @@ type Neighbor struct {
 }
 
 func GetOnlineNeighbors() ([]Neighbor, error) {
-	cmd := exec.Command("ip", "neigh", "show")
+	cmd := exec.Command("ip", "neigh", "show", "|", "grep", "br-lan")
 	outputBytes, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute 'ip neigh show': %w", err)
