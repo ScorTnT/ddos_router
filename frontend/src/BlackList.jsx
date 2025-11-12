@@ -30,7 +30,7 @@ const formatTime = (timestamp) => {
 
 function BlackList() {
     const [ipList, setIpList] = useState([]);
-    const [selectedIps, setSelectedIps] = useState(new Set()); // IP 주소를 Set으로 관리
+    const [selectedIps, setSelectedIps] = useState(new Set());
     const [updateError, setUpdateError] = useState(null);
 
     const fetchProtectionLog = async () => {
@@ -39,7 +39,7 @@ function BlackList() {
             const rawIpList = data.map(ipObj => ({
                 ...ipObj,
                 status : IP_STATUS.BLACKLIST,
-                isSelected : selectedIps.has(ipObj.ip), // selectedIps Set에 있는지 확인
+                isSelected : selectedIps.has(ipObj.ip),
             }));
             
             setIpList(rawIpList);
@@ -54,14 +54,13 @@ function BlackList() {
         setSelectedIps(prev => {
             const newSelected = new Set(prev);
             if (newSelected.has(ip)) {
-                newSelected.delete(ip); // 이미 선택된 경우 제거
+                newSelected.delete(ip);
             } else {
-                newSelected.add(ip); // 선택되지 않은 경우 추가
+                newSelected.add(ip);
             }
             return newSelected;
         });
 
-        // ipList의 isSelected 상태도 동기화
         setIpList((prev) =>
             prev.map((item) =>
                 item.ip === ip ? { ...item, isSelected: !item.isSelected } : item

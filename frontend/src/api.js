@@ -201,6 +201,29 @@ async function unblockIP(ip) {
   return unwrap(res);
 }
 
+async function getWhiteList() {
+  try{
+    const res = await http.get("/api/protection/whitelist");
+    return unwrap(res);
+  } catch (err) {
+    const status = err?.response?.status;
+    if(status ===404) return [];
+    throw err;
+  }
+}
+
+async function addWhiteList(ip) {
+  if (!ip) throw new Error("IP가 필요합니다.");
+  const res = await http.post("/api/protection/whitelist/add", null, { params: { ip } });
+  return unwrap(res);
+}
+
+async function removeWhiteList(ip) {
+  if (!ip) throw new Error("IP가 필요합니다.");
+  const res = await http.post("/api/protection/whitelist/remove", null, { params: { ip } });
+  return unwrap(res);
+}
+
 // 사용 예)
 // import api from "./api";
 // await api.login("root", "password", { remember: true });
