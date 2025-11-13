@@ -8,9 +8,13 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const SESSION_KEY = "session_id";
 
+// 디버깅: 환경변수 확인
+console.log('[API] VITE_API_URL:', API_BASE_URL);
+console.log('[API] Resolved baseURL:', API_BASE_URL || undefined);
+
 // axios 인스턴스
 const http = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL || undefined, // 빈 문자열이면 undefined로 (상대 경로 사용)
   headers: { "Content-Type": "application/json" },
   timeout: 15000,
 });
