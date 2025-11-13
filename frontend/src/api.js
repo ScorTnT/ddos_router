@@ -251,6 +251,10 @@ const api = {
   getProtection,
   blockIP,
   unblockIP,
+  // whiteList
+  getWhiteList,
+  addWhiteList,
+  removeWhiteList,
   // low-level
   http,
   setSession,

@@ -137,6 +137,25 @@ function InfoPanel() {
     const [logIndex, setLogIndex] = useState({});
     const [networkDevices, setNetworkDevices] = useState([]);
 
+    const InfoLabel = {
+    "mac" : "맥주소",
+    "model" : "모델",
+    "firmware_version" : "펌웨어 버전",
+    "cpu_usage" : "cpu 사용량",
+    "uptime" : "사용시간",
+    "connected_device_count" : "연결된 기기 수",
+    "upload_speed" : "업로드 속도",
+    "download_speed" : "다운로드 속도"
+    }
+
+    const formatRouterInfo = (data) => {
+        if (!data || typeof data !== 'object') return [];
+        return Object.entries(data).map(([key, value]) => ({
+            name : InfoLabel[key], // name : InfoLabel[key] key 
+            value : value,
+        }));
+    };
+
     const fetchRouterInfo = async () => {
         try {
             const [routerData, connectionsData] = await Promise.all([
@@ -159,7 +178,9 @@ function InfoPanel() {
                 }
                 setUpdateError(null);
             }
-
+            const koreanData = formatRouterInfo(routerInfo);
+            setRouterInfo(koreanData);
+            
             if (Array.isArray(connectionsData)) {
                 setConnectionLog(connectionsData);
                 // 연결 로그에서 네트워크 장치 정보 추출
@@ -175,6 +196,7 @@ function InfoPanel() {
             console.error('Router info update error:', error);
         }
     };
+
 
     // 연결 로그에서 네트워크 장치 정보 추출
     const extractNetworkDevices = (connections) => {
