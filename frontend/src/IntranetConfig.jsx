@@ -25,8 +25,8 @@ function IntranetConfig() {
     function fetchIntranetConfig() {
         api.getLANConfig().then((data) => {
             if (data) {
-                setIpAddress(data.IPAddress || "");
-                setSubnetMask(data.Netmask || "");
+                setIpAddress(data.ip_address || "");
+                setSubnetMask(data.netmask || "");
             }
         }).catch((error) => {
             console.error("Error loading intranet config:", error);
@@ -61,10 +61,6 @@ function IntranetConfig() {
                         onChange={(e) => setSubnetMask(e.target.value)}
                         fullWidth
                     />
-
-                    <Typography variant="body2" color="textSecondary">
-                        (내부 DHCP 설정은 추후 추가 예정)
-                    </Typography>
                     
                     <Button
                         variant="contained"

@@ -27,6 +27,7 @@ function NetworkConfig() {
     const [secondaryDNS, setSecondaryDNS] = useState("");
     const [wanMacAddress, setWanMacAddress] = useState("");
     const [mtu, setMtu] = useState("");
+    const [originalMtu, setOriginalMtu] = useState(""); // 원래 MTU 값 저장
     const [manualDns, setManualDns] = useState(false);
     const [macAddressChange, setMacAddressChange] = useState(false);
     const [manualMtu, setManualMtu] = useState(false);
@@ -47,7 +48,11 @@ function NetworkConfig() {
             setPrimaryDNS(data.dns_list && data.dns_list[0] || dhcpLabel);
             setSecondaryDNS(data.dns_list && data.dns_list[1] || dhcpLabel);
             setWanMacAddress(data.mac_addr || "");
-            setMtu(data.mtu || "error");
+            
+            const mtuValue = data.mtu == 0 ? "1500" : data.mtu;
+            setMtu(mtuValue);
+            setOriginalMtu(mtuValue); // 원래 값도 저장
+            
             setManualDns(data.is_custom_dns || false);
             setMacAddressChange(data.is_custom_mac || false);
             setManualMtu(data.manualMtu || false);
@@ -183,7 +188,22 @@ function NetworkConfig() {
                     />
 
                     <FormControlLabel
-                        control={<Switch checked={manualDns} onChange={(e) => setManualDns(e.target.checked)} />}
+                        control={<Switch 
+                            checked={manualDns} 
+                            onChange={(e) => {
+                                const isManual = e.target.checked;
+                                setManualDns(isManual);
+                                if (isManual) {
+                                    // 체크 시: 필드 비우기 (사용자가 수동 입력할 수 있도록)
+                                    setPrimaryDNS("");
+                                    setSecondaryDNS("");
+                                } else {
+                                    // 체크 해제 시: dhcp 라벨로 복원
+                                    setPrimaryDNS(dhcpLabel);
+                                    setSecondaryDNS(dhcpLabel);
+                                }
+                            }} 
+                        />}
                         label="DNS 주소 수동 입력"
                     />
                     <TextField
@@ -220,7 +240,18 @@ function NetworkConfig() {
                     </FormControl>
 
                     <FormControlLabel
-                        control={<Switch checked={manualMtu} onChange={(e) => setManualMtu(e.target.checked)} />}
+                        control={<Switch 
+                            checked={manualMtu} 
+                            onChange={(e) => {
+                                const isManual = e.target.checked;
+                                setManualMtu(isManual);
+                                if (!isManual) {
+                                    // 체크 해제 시: 원래 MTU 값으로 복원
+                                    setMtu(originalMtu);
+                                }
+                                // 체크 시: 현재 mtu 값 유지 (사용자가 수동 입력할 수 있도록)
+                            }} 
+                        />}
                         label="MTU 수동 입력"
                     />
                     <TextField

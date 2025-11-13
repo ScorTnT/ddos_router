@@ -149,11 +149,28 @@ function InfoPanel() {
     }
 
     const formatRouterInfo = (data) => {
-        if (!data || typeof data !== 'object') return [];
-        return Object.entries(data).map(([key, value]) => ({
-            name : InfoLabel[key], // name : InfoLabel[key] key 
-            value : value,
-        }));
+        if (!data) return [];
+
+        // plain object: { key: value, ... }
+        if (!Array.isArray(data) && typeof data === 'object') {
+            return Object.entries(data).map(([key, value]) => ({
+                name: InfoLabel[key] || key,
+                value: value,
+            }));
+        }
+
+        // already an array of { name, value } or similar
+        if (Array.isArray(data)) {
+            return data.map(item => {
+                if (item && typeof item === 'object' && 'name' in item) {
+                    const key = item.name;
+                    return { name: InfoLabel[key] || key, value: item.value };
+                }
+                return item;
+            });
+        }
+
+        return [];
     };
 
     const fetchRouterInfo = async () => {
@@ -162,24 +179,14 @@ function InfoPanel() {
                 apiClient.getInformation(),
                 apiClient.getConnections()
             ]);
+            // routerData를 직접 한글화하여 상태로 설정
             if (routerData) {
-                // API 응답이 객체인 경우 배열로 변환
-                if (Array.isArray(routerData)) {
-                    setRouterInfo(routerData);
-                } else if (typeof routerData === 'object') {
-                    // 객체를 {name, value} 배열로 변환
-                    const routerArray = Object.entries(routerData).map(([key, value]) => ({
-                        name: key,
-                        value: value
-                    }));
-                    setRouterInfo(routerArray);
-                } else {
-                    setRouterInfo([]);
-                }
+                const koreanData = formatRouterInfo(routerData);
+                setRouterInfo(koreanData);
                 setUpdateError(null);
+            } else {
+                setRouterInfo([]);
             }
-            const koreanData = formatRouterInfo(routerInfo);
-            setRouterInfo(koreanData);
             
             if (Array.isArray(connectionsData)) {
                 setConnectionLog(connectionsData);
