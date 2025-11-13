@@ -208,7 +208,8 @@ function InfoPanel() {
     // 연결 로그에서 네트워크 장치 정보 추출
     const extractNetworkDevices = (connections) => {
         const deviceMap = new Map();
-        const routerIP = '192.168.1.1'; // 라우터 IP (실제 환경에 맞게 조정)
+        // 라우터 IP 목록 (게이트웨이 IP들 제외)
+        const routerIPs = ['192.168.1.1', '192.168.2.1', '10.0.0.1', '172.16.0.1'];
 
         connections.forEach(conn => {
             // 내부 네트워크 IP만 처리 (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
@@ -218,8 +219,13 @@ function InfoPanel() {
                        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip);
             };
 
+            // 라우터 IP인지 확인
+            const isRouterIP = (ip) => {
+                return routerIPs.includes(ip) || ip.endsWith('.1'); // .1로 끝나는 IP는 일반적으로 게이트웨이
+            };
+
             [conn.source_ip, conn.dest_ip].forEach(ip => {
-                if (ip !== routerIP && isInternalIP(ip)) {
+                if (!isRouterIP(ip) && isInternalIP(ip)) {
                     if (!deviceMap.has(ip)) {
                         deviceMap.set(ip, {
                             ip: ip,
