@@ -14,6 +14,12 @@ export default defineConfig({
                 target: 'http://192.168.2.1',
                 changeOrigin: true,
                 secure: false,
+                configure: (proxy) => {
+                    proxy.on('proxyReq', (proxyReq) => {
+                        // Origin 헤더를 target 주소로 변경
+                        proxyReq.setHeader('Origin', 'http://192.168.2.1');
+                    });
+                }
             }
         }
     }
