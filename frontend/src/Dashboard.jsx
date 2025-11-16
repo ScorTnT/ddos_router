@@ -142,6 +142,7 @@ function InfoPanel() {
     "model" : "모델",
     "firmware_version" : "펌웨어 버전",
     "cpu_usage" : "cpu 사용량",
+    "memory_usage" : "메모리 사용량",
     "uptime" : "사용시간",
     "connected_device_count" : "연결된 기기 수",
     "upload_speed" : "업로드 속도",

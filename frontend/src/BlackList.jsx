@@ -22,11 +22,14 @@ const IP_STATUS = {
     WHITELIST: 'whitelist',
 };
 
+// 시간 포맷 함수는 이제 사용되지 않으므로 제거하거나 그대로 둡니다 (여기서는 제거합니다).
+/*
 const formatTime = (timestamp) => {
     if (!timestamp) return '-';
     const date = new Date(timestamp * 1000); 
     return date.toLocaleString();
 };
+*/
 
 function BlackList() {
     const [ipList, setIpList] = useState([]);
@@ -48,7 +51,7 @@ function BlackList() {
                 const ip = typeof ipObj === 'string' ? ipObj : ipObj.ip;
                 return {
                     ip: ip,
-                    expire_at: ipObj.expire_at || null,
+                    // 시간 필드 제거
                     status : IP_STATUS.WHITELIST,
                     isSelected : selectedIps.has(ip),
                 };
@@ -92,8 +95,11 @@ function BlackList() {
 
         try {
             for (const ip of selectedBlackIps) {
-                await api.addWhiteList(ip);
-                await api.unblockIP(ip);
+                const addWhiteListRes = await api.addWhiteList(ip);
+                console.log(`[API LOG] ${ip} - addWhiteList 응답:`, addWhiteListRes);
+
+                const unblockIPRes = await api.unblockIP(ip);
+                console.log(`[API LOG] ${ip} - unblockIP 응답:`, unblockIPRes);
             }
             
             await fetchProtectionLog();
@@ -117,16 +123,23 @@ function BlackList() {
 
         try {
             for (const ip of selectedWhiteIps) {
-                await api.blockIP(ip);
-                await api.removeWhiteList(ip);
+                // 1. IP 차단 API 호출 및 응답 로깅
+                const blockIPRes = await api.blockIP(ip);
+                console.log(`[API LOG] ${ip} - blockIP 응답:`, blockIPRes);
+
+                // 2. WhiteList 제거 API 호출 및 응답 로깅
+                const removeWhiteListRes = await api.removeWhiteList(ip);
+                console.log(`[API LOG] ${ip} - removeWhiteList 응답:`, removeWhiteListRes);
             }
             
+            // API 호출 후 서버에서 최신 상태를 다시 가져와 일괄 업데이트
             await fetchProtectionLog();
             setSelectedIps(new Set());
 
         } catch (error) {
-            console.error('IP 차단 오류', error);
-            alert('IP 차단 중 오류가 발생했습니다.');
+            // ★ 중요한 디버깅 지점: 에러가 발생하면 어떤 IP의 어떤 API에서 문제가 발생했는지 확인
+            console.error('IP 차단 오류 - 상세 에러 객체:', error);
+            alert(`IP 차단 중 오류가 발생했습니다: ${error.message}`);
         }
     };
 
@@ -167,13 +180,13 @@ function BlackList() {
                                 <TableRow>
                                     <TableCell padding="checkbox" />
                                     <TableCell sx={{ fontWeight: 'bold' }}>IP</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>차단된 시각</TableCell>
+                                    {/* <TableCell sx={{ fontWeight: 'bold' }}>차단 해제 시각</TableCell> */}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {updateError ? (
                                     <TableRow>
-                                        <TableCell colSpan={3} align="center">
+                                        <TableCell colSpan={2} align="center">
                                             <Typography color="error" variant="body1">
                                                 {updateError}
                                             </Typography>
@@ -181,7 +194,7 @@ function BlackList() {
                                     </TableRow>         
                                 ) : blackList.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={3} align="center">
+                                        <TableCell colSpan={2} align="center">
                                             <Typography color="textSecondary" variant="body1">
                                                 차단된 IP가 존재하지 않습니다.
                                             </Typography>
@@ -196,7 +209,7 @@ function BlackList() {
                                             />
                                         </TableCell>
                                         <TableCell>{pLog.ip}</TableCell>
-                                        <TableCell>{formatTime(pLog.expire_at)}</TableCell> 
+                                        {/* <TableCell>{formatTime(pLog.expire_at)}</TableCell> */}
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -228,13 +241,13 @@ function BlackList() {
                                 <TableRow>
                                     <TableCell padding="checkbox" />
                                     <TableCell sx={{ fontWeight: 'bold' }}>IP</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>추가된 시각</TableCell> 
+                                    {/* <TableCell sx={{ fontWeight: 'bold' }}>추가된 시각</TableCell> */}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {whiteList.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={3} align="center">
+                                        <TableCell colSpan={2} align="center">
                                             <Typography color="textSecondary" variant="body1">
                                                 허용된 IP가 존재하지 않습니다.
                                             </Typography>
@@ -249,7 +262,7 @@ function BlackList() {
                                             />
                                         </TableCell>
                                         <TableCell>{pLog.ip}</TableCell>
-                                        <TableCell>{formatTime(pLog.added_at) || '-'}</TableCell> 
+                                        {/* <TableCell>{formatTime(pLog.added_at) || '-'}</TableCell> */}
                                     </TableRow>
                                 ))}
                             </TableBody>
