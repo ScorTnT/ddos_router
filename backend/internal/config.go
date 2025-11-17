@@ -11,9 +11,8 @@ type WebAPIConfig struct {
 }
 
 type InferfaceConfig struct {
-	WANInterfaceName    string `yaml:"wan_interface_name"`
-	LANInterfaceName    string `yaml:"lan_interface_name"`
-	BridgeInterfaceName string `yaml:"bridge_interface_name"`
+	WANInterfaceName string `yaml:"wan_interface_name"`
+	LANInterfaceName string `yaml:"lan_interface_name"`
 }
 
 type SnortAlertScannerConfig struct {

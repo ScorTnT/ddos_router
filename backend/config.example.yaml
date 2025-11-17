@@ -14,10 +14,7 @@ interface:
   # 라우터 정보 조회/방화벽 초기화 등에서 사용됩니다.
   wan_interface_name: "eth0"
   lan_interface_name: "eth1"
-  # 브리지 인터페이스 이름 (가상 인터페이스)
-  # OpenWrt 예: "br-lan"
-  # 방화벽 규칙에서 LAN 트래픽 필터링에 사용됩니다.
-  bridge_interface_name: "br-lan"
+  # 방화벽 규칙에서 LAN 출발 트래픽 필터링에 사용됩니다.
 
 snort:
   # Snort(또는 호환) 경보 로그(JSON Lines) 파일 경로
@@ -32,4 +29,3 @@ protection:
   protection_ttl: 30
   # 하우스키핑 주기(ms): 만료 체크 등 내부 주기 동작
   refresh_tick: 1000
-
