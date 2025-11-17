@@ -9,7 +9,7 @@ import (
 func InitFirewall(lanInterface, wanInterface string) error {
 	commands := [][]string{
 		{"add", "table", "inet", "ddos_filter"},
-		{"add", "chain", "inet", "ddos_filter", "forward", "{ type filter hook forward priority 30 ; policy accept ; }"},
+		{"add", "chain", "inet", "ddos_filter", "forward", "{ type filter hook forward priority -50 ; policy accept ; }"},
 		{"add", "set", "inet", "ddos_filter", "ban_set", "{ type ipv4_addr; }"},
 		{"add", "rule", "inet", "ddos_filter", "forward", "iifname", lanInterface, "oifname", wanInterface, "ip", "saddr", "@ban_set", "drop"},
 	}
