@@ -22,7 +22,6 @@ const IP_STATUS = {
     WHITELIST: 'whitelist',
 };
 
-// 시간 포맷 함수는 이제 사용되지 않으므로 제거하거나 그대로 둡니다 (여기서는 제거합니다).
 /*
 const formatTime = (timestamp) => {
     if (!timestamp) return '-';
@@ -40,7 +39,7 @@ function BlackList() {
         try {
             const rawBlackList = await api.getProtection();
             const rawWhiteList = await api.getWhiteList();
-            
+
             const blackListItems = rawBlackList.map(ipObj => ({
                 ...ipObj,
                 status : IP_STATUS.BLACKLIST,
@@ -95,11 +94,8 @@ function BlackList() {
 
         try {
             for (const ip of selectedBlackIps) {
-                const addWhiteListRes = await api.addWhiteList(ip);
-                console.log(`[API LOG] ${ip} - addWhiteList 응답:`, addWhiteListRes);
-
                 const unblockIPRes = await api.unblockIP(ip);
-                console.log(`[API LOG] ${ip} - unblockIP 응답:`, unblockIPRes);
+                const addWhiteListRes = await api.addWhiteList(ip);
             }
             
             await fetchProtectionLog();
@@ -123,13 +119,8 @@ function BlackList() {
 
         try {
             for (const ip of selectedWhiteIps) {
-                // 1. IP 차단 API 호출 및 응답 로깅
-                const blockIPRes = await api.blockIP(ip);
-                console.log(`[API LOG] ${ip} - blockIP 응답:`, blockIPRes);
-
-                // 2. WhiteList 제거 API 호출 및 응답 로깅
                 const removeWhiteListRes = await api.removeWhiteList(ip);
-                console.log(`[API LOG] ${ip} - removeWhiteList 응답:`, removeWhiteListRes);
+                const blockIPRes = await api.blockIP(ip);
             }
             
             // API 호출 후 서버에서 최신 상태를 다시 가져와 일괄 업데이트
@@ -137,8 +128,7 @@ function BlackList() {
             setSelectedIps(new Set());
 
         } catch (error) {
-            // ★ 중요한 디버깅 지점: 에러가 발생하면 어떤 IP의 어떤 API에서 문제가 발생했는지 확인
-            console.error('IP 차단 오류 - 상세 에러 객체:', error);
+            console.error('IP 차단 오류', error);
             alert(`IP 차단 중 오류가 발생했습니다: ${error.message}`);
         }
     };
